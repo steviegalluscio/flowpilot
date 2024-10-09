@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import IntFlag
 from typing import Dict, List, Union
 
@@ -53,7 +53,7 @@ class CAR:
 @dataclass
 class SubaruCarInfo(CarInfo):
   package: str = "EyeSight Driver Assistance"
-  car_parts: CarParts = CarParts.common([CarPart.subaru_a])
+  car_parts: CarParts = field(default_factory=lambda: CarParts.common([CarPart.subaru_a]))
 
 
 CAR_INFO: Dict[str, Union[SubaruCarInfo, List[SubaruCarInfo]]] = {

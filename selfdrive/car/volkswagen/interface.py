@@ -11,16 +11,6 @@ EventName = car.CarEvent.EventName
 
 
 class CarInterface(CarInterfaceBase):
-  def __init__(self, CP, CarController, CarState):
-    super().__init__(CP, CarController, CarState)
-
-    if CP.networkLocation == NetworkLocation.fwdCamera:
-      self.ext_bus = CANBUS.pt
-      self.cp_ext = self.cp
-    else:
-      self.ext_bus = CANBUS.cam
-      self.cp_ext = self.cp_cam
-
   @staticmethod
   def _get_params(ret, candidate, fingerprint, car_fw, experimental_long, docs):
     ret.carName = "volkswagen"

@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Union
 
 from cereal import car
@@ -36,7 +36,7 @@ NISSAN_PARTS: List[CarPart] = [CarPart.harness_box, CarPart.rj45_cable_7ft, CarP
 @dataclass
 class NissanCarInfo(CarInfo):
   package: str = "ProPILOT Assist"
-  car_parts: CarParts = CarParts([CarPart.nissan_a] + NISSAN_PARTS)
+  car_parts: CarParts = field(default_factory=lambda: CarParts([CarPart.nissan_a] + NISSAN_PARTS))
 
 
 CAR_INFO: Dict[str, Optional[Union[NissanCarInfo, List[NissanCarInfo]]]] = {

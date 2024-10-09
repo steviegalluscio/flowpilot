@@ -1,5 +1,5 @@
 from collections import defaultdict
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Dict, List, Set, Union
 
 from cereal import car
@@ -66,7 +66,7 @@ DBC: Dict[str, Dict[str, str]] = defaultdict(lambda: dbc_dict("ford_lincoln_base
 @dataclass
 class FordCarInfo(CarInfo):
   package: str = "Co-Pilot360 Assist+"
-  car_parts: CarParts = CarParts.common([CarPart.ford_q3])
+  car_parts: CarParts = field(default_factory=lambda: CarParts.common([CarPart.ford_q3]))
 
   def init_make(self, CP: car.CarParams):
     if CP.carFingerprint in (CAR.BRONCO_SPORT_MK1, CAR.MAVERICK_MK1):
