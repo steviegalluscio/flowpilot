@@ -13,27 +13,27 @@ def plannerd_thread(sm=None, pm=None):
 
   cloudlog.info("plannerd is waiting for CarParams")
   params = Params()
-  CP = car.CarParams.from_bytes(params.get("CarParams", block=True))
-  cloudlog.info("plannerd got CarParams: %s", CP.carName)
+  with car.CarParams.from_bytes(params.get("CarParams", block=True)) as CP:
+    cloudlog.info("plannerd got CarParams: %s", CP.carName)
 
-  longitudinal_planner = LongitudinalPlanner(CP)
-  lateral_planner = LateralPlanner(CP)
+    longitudinal_planner = LongitudinalPlanner(CP)
+    lateral_planner = LateralPlanner(CP)
 
-  if sm is None:
-    sm = messaging.SubMaster(['carControl', 'carState', 'controlsState', 'radarState', 'modelV2'],
-                             poll=['radarState', 'modelV2'], ignore_avg_freq=['radarState'])
+    if sm is None:
+      sm = messaging.SubMaster(['carControl', 'carState', 'controlsState', 'radarState', 'modelV2'],
+                              poll=['radarState', 'modelV2'], ignore_avg_freq=['radarState'])
 
-  if pm is None:
-    pm = messaging.PubMaster(['longitudinalPlan', 'lateralPlan'])
+    if pm is None:
+      pm = messaging.PubMaster(['longitudinalPlan', 'lateralPlan'])
 
-  while True:
-    sm.update()
+    while True:
+      sm.update()
 
-    if sm.updated['modelV2']:
-      lateral_planner.update(sm)
-      lateral_planner.publish(sm, pm)
-      longitudinal_planner.update(sm)
-      longitudinal_planner.publish(sm, pm)
+      if sm.updated['modelV2']:
+        lateral_planner.update(sm)
+        lateral_planner.publish(sm, pm)
+        longitudinal_planner.update(sm)
+        longitudinal_planner.publish(sm, pm)
 
 
 def main(sm=None, pm=None):

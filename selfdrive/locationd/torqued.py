@@ -139,19 +139,19 @@ class TorqueEstimator:
     torque_cache = params.get("LiveTorqueParameters")
     if params_cache is not None and torque_cache is not None:
       try:
-        cache_ltp = log.Event.from_bytes(torque_cache).liveTorqueParameters
-        cache_CP = car.CarParams.from_bytes(params_cache)
-        if self.get_restore_key(cache_CP, cache_ltp.version) == self.get_restore_key(CP, VERSION):
-          if cache_ltp.liveValid:
-            initial_params = {
-              'latAccelFactor': cache_ltp.latAccelFactorFiltered,
-              'latAccelOffset': cache_ltp.latAccelOffsetFiltered,
-              'frictionCoefficient': cache_ltp.frictionCoefficientFiltered
-            }
-          initial_params['points'] = cache_ltp.points
-          self.decay = cache_ltp.decay
-          self.filtered_points.load_points(initial_params['points'])
-          cloudlog.info("restored torque params from cache")
+        with log.Event.from_bytes(torque_cache).liveTorqueParameters as cache_ltp:
+          with car.CarParams.from_bytes(params_cache) as cache_CP:
+            if self.get_restore_key(cache_CP, cache_ltp.version) == self.get_restore_key(CP, VERSION):
+              if cache_ltp.liveValid:
+                initial_params = {
+                  'latAccelFactor': cache_ltp.latAccelFactorFiltered,
+                  'latAccelOffset': cache_ltp.latAccelOffsetFiltered,
+                  'frictionCoefficient': cache_ltp.frictionCoefficientFiltered
+                }
+              initial_params['points'] = cache_ltp.points
+              self.decay = cache_ltp.decay
+              self.filtered_points.load_points(initial_params['points'])
+              cloudlog.info("restored torque params from cache")
       except Exception:
         cloudlog.exception("failed to restore cached torque params")
         params.remove("LiveTorqueCarParams")
@@ -262,34 +262,34 @@ def main(sm=None, pm=None):
     pm = messaging.PubMaster(['liveTorqueParameters'])
 
   params = Params()
-  CP = car.CarParams.from_bytes(params.get("CarParams", block=True))
-  estimator = TorqueEstimator(CP)
+  with car.CarParams.from_bytes(params.get("CarParams", block=True)) as CP:
+    estimator = TorqueEstimator(CP)
 
-  def cache_params(sig, frame):
-    signal.signal(sig, signal.SIG_DFL)
-    cloudlog.warning("caching torque params")
+    def cache_params(sig, frame):
+      signal.signal(sig, signal.SIG_DFL)
+      cloudlog.warning("caching torque params")
 
-    params = Params()
-    params.put("LiveTorqueCarParams", CP.as_builder().to_bytes())
+      params = Params()
+      params.put("LiveTorqueCarParams", CP.as_builder().to_bytes())
 
-    msg = estimator.get_msg(with_points=True)
-    params.put("LiveTorqueParameters", msg.to_bytes())
+      msg = estimator.get_msg(with_points=True)
+      params.put("LiveTorqueParameters", msg.to_bytes())
 
-    sys.exit(0)
-  if "REPLAY" not in os.environ:
-    signal.signal(signal.SIGINT, cache_params)
+      sys.exit(0)
+    if "REPLAY" not in os.environ:
+      signal.signal(signal.SIGINT, cache_params)
 
-  while True:
-    sm.update()
-    if sm.all_checks():
-      for which in sm.updated.keys():
-        if sm.updated[which]:
-          t = sm.logMonoTime[which] * 1e-9
-          estimator.handle_log(t, which, sm[which])
+    while True:
+      sm.update()
+      if sm.all_checks():
+        for which in sm.updated.keys():
+          if sm.updated[which]:
+            t = sm.logMonoTime[which] * 1e-9
+            estimator.handle_log(t, which, sm[which])
 
-    # 4Hz driven by liveLocationKalman
-    if sm.frame % 5 == 0:
-      pm.send('liveTorqueParameters', estimator.get_msg(valid=sm.all_checks()))
+      # 4Hz driven by liveLocationKalman
+      if sm.frame % 5 == 0:
+        pm.send('liveTorqueParameters', estimator.get_msg(valid=sm.all_checks()))
 
 
 if __name__ == "__main__":

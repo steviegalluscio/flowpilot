@@ -67,10 +67,10 @@ class Calibrator:
 
     if param_put and calibration_params:
       try:
-        msg = log.Event.from_bytes(calibration_params)
-        rpy_init = np.array(msg.liveCalibration.rpyCalib)
-        valid_blocks = msg.liveCalibration.validBlocks
-        wide_from_device_euler = np.array(msg.liveCalibration.wideFromDeviceEuler)
+        with log.Event.from_bytes(calibration_params) as msg:
+          rpy_init = np.array(msg.liveCalibration.rpyCalib)
+          valid_blocks = msg.liveCalibration.validBlocks
+          wide_from_device_euler = np.array(msg.liveCalibration.wideFromDeviceEuler)
       except Exception:
         cloudlog.exception("Error reading cached CalibrationParams")
 

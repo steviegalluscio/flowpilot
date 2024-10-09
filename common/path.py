@@ -1,7 +1,7 @@
 import os
 
 def flowpilot_root():
-    return "/data/data/ai.flow.android/files"
+    return "/data/data/ai.flow.android/files/app"
 
 def internal(path):
     return os.path.join(flowpilot_root(), path)

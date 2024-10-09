@@ -71,7 +71,7 @@ class Calibrator:
 
     if calibration_params:
       try:
-          msg = log.Event.from_bytes(calibration_params)
+        with log.Event.from_bytes(calibration_params) as msg:
           if msg is not None:
             rpy_init = np.array(msg.liveCalibration.rpyCalib)
             valid_blocks = msg.liveCalibration.validBlocks
