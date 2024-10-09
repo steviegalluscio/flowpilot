@@ -227,8 +227,6 @@ public class AndroidLauncher extends FragmentActivity implements AndroidFragment
 		params.put("DeviceManufacturer", Build.MANUFACTURER);
 		params.put("DeviceModel", Build.MODEL);
 
-		utils.F2 = !params.getBool("F3");
-
 		// get camera intrinsics from file if they exist
 		LoadIntrinsicsFromFile();
 
