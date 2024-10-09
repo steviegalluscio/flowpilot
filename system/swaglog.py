@@ -7,8 +7,9 @@ from logging.handlers import BaseRotatingHandler
 import zmq
 
 from common.logging_extra import SwagLogger, SwagFormatter, SwagLogFileFormatter
+from common.path import flowpilot_root
 
-SWAGLOG_DIR = os.path.join(str(Path.home()), ".flowdrive", "log")
+SWAGLOG_DIR = os.path.join(flowpilot_root(), ".flowdrive", "log")
 
 def get_file_handler():
   Path(SWAGLOG_DIR).mkdir(parents=True, exist_ok=True)

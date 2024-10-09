@@ -17,6 +17,10 @@
 #include "common/util.h"
 #include "common/version.h"
 
+#include "system/hardware/hw.h"
+
+#include <android/log.h>
+
 class SwaglogState : public LogState {
  public:
   SwaglogState() : LogState("ipc:///tmp/logmessage") {}
@@ -61,7 +65,7 @@ uint32_t NO_FRAME_ID = std::numeric_limits<uint32_t>::max();
 
 static void log(int levelnum, const char* filename, int lineno, const char* func, const char* msg, const std::string& log_s) {
   if (levelnum >= s.print_level) {
-    printf("%s: %s\n", filename, msg);
+    __android_log_print(ANDROID_LOG_INFO, filename, "%s\n", msg);
   }
   char levelnum_c = levelnum;
   zmq_send(s.sock, (levelnum_c + log_s).c_str(), log_s.length() + 1, ZMQ_NOBLOCK);

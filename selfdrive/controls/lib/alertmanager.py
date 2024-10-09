@@ -10,7 +10,7 @@ from common.params import Params
 from selfdrive.controls.lib.events import Alert
 
 
-with open(os.path.join(BASEDIR, "selfdrive/controls/lib/alerts_offroad.json")) as f:
+with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "alerts_offroad.json")) as f:
   OFFROAD_ALERTS = json.load(f)
 
 

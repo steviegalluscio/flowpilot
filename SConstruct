@@ -65,13 +65,50 @@ else:
   ccflags = []
   ldflags = []
 
+lenv = {
+  "PATH": "/home/fgx/.buildozer/android/platform/android-ndk-r25b/toolchains/llvm/prebuilt/linux-x86_64/bin/:/home/fgx/p4a2/venv/bin:/bin:/usr/local/bin/", #os.environ['PATH'],
+  "LD_LIBRARY_PATH": ["/home/fgx/p4a2/.buildozer/android/platform/build-arm64-v8a/build/libs_collections/oscservice/arm64-v8a"],
+  "PYTHONPATH": Dir("#").abspath + ':' + Dir(f"#third_party/acados").abspath,
+
+  "ACADOS_SOURCE_DIR": Dir("#third_party/acados").abspath,
+  "ACADOS_PYTHON_INTERFACE_PATH": Dir("#third_party/acados/acados_template").abspath,
+  "TERA_PATH": Dir("#").abspath + f"/third_party/acados/x86_64/t_renderer"
+}
+
+cflags = []
+cxxflags = []
+cpppath = []
+rpath = [] #lenv["LD_LIBRARY_PATH"].copy()
+
+libpath = [
+  # f"#third_party/acados/{arch}/lib",
+  # f"#third_party/libyuv/{arch}/lib",
+
+  # "/usr/lib",
+  # "/usr/local/lib",
+]
+
+
+if GetOption('asan'):
+  ccflags = ["-fsanitize=address", "-fno-omit-frame-pointer"]
+  ldflags = ["-fsanitize=address"]
+elif GetOption('ubsan'):
+  ccflags = ["-fsanitize=undefined"]
+  ldflags = ["-fsanitize=undefined"]
+else:
+  ccflags = []
+  ldflags = ['-llog']
+
+# Enable swaglog include in submodules
 cflags += ['-DSWAGLOG="\\"common/swaglog.h\\""']
 cxxflags += ['-DSWAGLOG="\\"common/swaglog.h\\""']
 
+# ccflags_option = GetOption('ccflags')
+# if ccflags_option:
+#   ccflags += ccflags_option.split(' ')
+
 env = Environment(
   ENV=lenv,
-  CC='clang',
-  CXX='clang++',
   CCFLAGS=[
     "-g",
     "-fPIC",
@@ -86,50 +123,80 @@ env = Environment(
     "-Wno-c99-designator",
     "-Wno-reorder-init-list",
     "-Wno-error=unused-but-set-variable",
-    "-Wno-c++11-narrowing"
+    "-Wno-vla-cxx-extension",
   ] + cflags + ccflags,
 
-  LINKFLAGS=ldflags,
-  LIBPATH=libpath + [
-    "#cereal",
-    "#libs",
-    "#opendbc/can/",
-    "#common",
-    "#selfdrive/boardd",
-    "#third_party",
-  ],
-
-  RPATH=rpath,
-
-  CFLAGS=["-std=gnu11"] + cflags,
-  CXXFLAGS=["-std=c++1z"] + cxxflags,
   CPPPATH=cpppath + [
     "#",
     "#third_party/acados/include",
     "#third_party/acados/include/blasfeo/include",
     "#third_party/acados/include/hpipm/include",
-    "#cereal",
-    "#opendbc/can",
-    "#common",
+    "#third_party/catch2/include",
+    "#third_party/libusb",
+    "#third_party/libyuv/include",
+    "#third_party/json11",
+    "#third_party/opencl/include",
+    "#third_party/linux/include",
+    "#third_party/snpe/include",
+    "#third_party/lmdb",
+    "#third_party/qrcode",
     "#third_party",
+    "#cereal",
+    "#common",
+    "#msgq",
+    "#opendbc/can",
+    # "/home/fgx/openpilot/third_party",
+    "/home/fgx/p4a2/.buildozer/android/platform/build-arm64-v8a/build/other_builds/capnp/arm64-v8a__ndk_target_24/capnp/c++/src/",
+    "/home/fgx/p4a2/.buildozer/android/platform/build-arm64-v8a/build/other_builds/libzmq/arm64-v8a__ndk_target_24/libzmq/include/",
+    "/home/fgx/p4a2/.buildozer/android/platform/build-arm64-v8a/build/other_builds/python3/arm64-v8a__ndk_target_24/python3/Include/",
+    "/home/fgx/p4a2/.buildozer/android/platform/build-arm64-v8a/build/python-installs/oscservice/arm64-v8a/numpy/core/include/",
+    # "/usr/local/include/capnp/",
+  ],
+
+  CC='clang --target=aarch64-linux-android24 --sysroot=/home/fgx/.buildozer/android/platform/android-ndk-r25b/toolchains/llvm/prebuilt/linux-x86_64/sysroot',
+  CXX='clang++ --target=aarch64-linux-android24 --sysroot=/home/fgx/.buildozer/android/platform/android-ndk-r25b/toolchains/llvm/prebuilt/linux-x86_64/sysroot',
+  LINKFLAGS=ldflags,
+  AR='llvm-ar',
+  RANLIB='llvm-ranlib',
+  LD='llvm-ld',
+
+  RPATH=rpath,
+
+  CFLAGS=["-std=gnu11"] + cflags,
+  CXXFLAGS=["-std=c++1z"] + cxxflags,
+  LIBPATH=libpath + [
+    "#msgq_repo",
+    "#third_party",
+    "#third_party/json11",
+    "#third_party/libusb/android/libs/arm64-v8a",
+    "#third_party/opencl",
+    "#third_party/lmdb",
+    "#selfdrive/pandad",
+    "#common",
+    "#rednose/helpers",
+    # "/home/fgx/openpilot/cereal",
+    # "/home/fgx/.buildozer/android/platform/android-ndk-r25b/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib",
+    "/home/fgx/p4a2/.buildozer/android/platform/build-arm64-v8a/build/libs_collections/flowy/arm64-v8a",
+    "/home/fgx/p4a2/.buildozer/android/platform/build-arm64-v8a/build/other_builds/python3/arm64-v8a__ndk_target_24/python3/android-build",
+    "/home/fgx/.buildozer/android/platform/android-ndk-r25b/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android/32",
   ],
   CYTHONCFILESUFFIX=".cpp",
+  COMPILATIONDB_USE_ABSPATH=True,
+  # REDNOSE_ROOT="#",
+  tools=["default", "cython"],
   toolpath = ['opendbc/site_scons/site_tools'],
-  tools=["default", "cython"]
 )
 
 # Cython build enviroment
-py_include = sysconfig.get_paths()['include']
+py_include = "/home/fgx/p4a2/.buildozer/android/platform/build-arm64-v8a/build/other_builds/python3/arm64-v8a__ndk_target_24/python3/Include/" # sysconfig.get_paths()['include']
 envCython = env.Clone()
-envCython["CPPPATH"] += [py_include, np.get_include()]
+envCython["CPPPATH"] += [py_include] #, np.get_include()]
 envCython["CCFLAGS"] += ["-Wno-#warnings", "-Wno-shadow", "-Wno-deprecated-declarations"]
+envCython["CCFLAGS"].remove("-Werror")
 
-envCython["LIBS"] = []
+envCython["LIBS"] = ['python3.11']
 if arch == "Darwin":
-  envCython["LINKFLAGS"] = ["-bundle", "-undefined", "dynamic_lookup"]
-elif arch == "aarch64":
-  envCython["LINKFLAGS"] = ["-shared"]
-  envCython["LIBS"] = [os.path.basename(py_include)]
+  envCython["LINKFLAGS"] = ["-bundle", "-undefined", "dynamic_lookup"] + darwin_rpath_link_flags
 else:
   envCython["LINKFLAGS"] = ["-pthread", "-shared"]
 
@@ -140,10 +207,8 @@ Export('env', 'arch', 'QCOM_REPLAY', 'SHARED')
 
 SConscript(['common/SConscript'])
 Import('_common')
-if SHARED:
-  common = abspath(common)
-else:
-  common = [_common, 'json11', 'lmdb']
+
+common = [_common, 'json11', 'lmdb']
 
 
 Export('common')
@@ -162,22 +227,20 @@ elif arch == "aarch64":
 else:
   envCython["LINKFLAGS"] = ["-pthread", "-shared"]
 
-envCython["LIBS"] = python_libs
+envCython["LIBS"] = ['python3.11']
 
 Export('envCython')
 
 # cereal and messaging are shared with the system
 SConscript(['cereal/SConscript'])
-if SHARED:
-  cereal = abspath([File('cereal/libcereal_shared.so')])
-  messaging = abspath([File('cereal/libmessaging_shared.so')])
-else:
-  cereal = [File('#cereal/libcereal.a')]
-  messaging = [File('#cereal/libmessaging.a')]
+# if SHARED:
+#   cereal = abspath([File('cereal/libcereal_shared.so')])
+#   messaging = abspath([File('cereal/libmessaging_shared.so')])
+# else:
 
-Export('cereal', 'messaging')
+# Export('cereal', 'messaging')
 
-# Build rednose library and ekf models
+# # Build rednose library and ekf models
 
 rednose_deps = [
   "#selfdrive/locationd/models/constants.py",
@@ -217,7 +280,7 @@ SConscript([
   'panda/SConscript',
 ])
 
-SConscript(['SConscript'])
+# SConscript(['SConscript'])
 
 SConscript(['system/proclogd/SConscript'])
 
@@ -229,9 +292,9 @@ SConscript(['selfdrive/modeld/SConscript'])
 SConscript(['selfdrive/controls/lib/lateral_mpc_lib/SConscript'])
 SConscript(['selfdrive/controls/lib/longitudinal_mpc_lib/SConscript'])
 
-SConscript(['selfdrive/locationd/SConscript'])
+# SConscript(['selfdrive/locationd/SConscript'])
 SConscript(['selfdrive/boardd/SConscript'])
 SConscript(['selfdrive/loggerd/SConscript'])
 
-if GetOption('test'):
-  SConscript('panda/tests/safety/SConscript')
+# if GetOption('test'):
+#   SConscript('panda/tests/safety/SConscript')

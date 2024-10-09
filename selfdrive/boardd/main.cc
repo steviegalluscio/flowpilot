@@ -5,6 +5,8 @@
 #include "common/util.h"
 #include "system/hardware/hw.h"
 
+#include <jni.h>
+
 int main(int argc, char *argv[]) {
   LOGW("starting boardd");
 
@@ -30,4 +32,10 @@ int main(int argc, char *argv[]) {
     boardd_main_thread(usb_devs);
   }
   return 0;
+}
+
+extern "C" {
+JNIEXPORT void Java_ai_flow_flowy_ServicePandad_nativeInit(JNIEnv* env, jclass cls, jint fd) {
+  boardd_main_thread(fd);
+}
 }

@@ -29,7 +29,8 @@ except ImportError:
 context = Context()
 
 def log_from_bytes(dat: bytes) -> capnp.lib.capnp._DynamicStructReader:
-  return log.Event.from_bytes(dat, traversal_limit_in_words=NO_TRAVERSAL_LIMIT)
+  with log.Event.from_bytes(dat, traversal_limit_in_words=NO_TRAVERSAL_LIMIT) as event:
+    return event
 
 def new_message(service: Optional[str] = None, size: Optional[int] = None) -> capnp.lib.capnp._DynamicStructBuilder:
   dat = log.Event.new_message()

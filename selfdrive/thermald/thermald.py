@@ -6,7 +6,7 @@ import time
 from collections import OrderedDict, namedtuple
 from typing import Dict, Optional, Tuple
 
-import psutil
+# import psutil
 
 import cereal.messaging as messaging
 from cereal import log
@@ -51,26 +51,26 @@ def get_device_state():
   msg = messaging.new_message("deviceState")
   
   msg.deviceState.freeSpacePercent = get_available_percent(default=100.0)
-  msg.deviceState.memoryUsagePercent = int(round(psutil.virtual_memory().percent))
-  msg.deviceState.cpuUsagePercent = [int(round(n)) for n in psutil.cpu_percent(percpu=True)]
+  msg.deviceState.memoryUsagePercent = 0#int(round(psutil.virtual_memory().percent))
+  msg.deviceState.cpuUsagePercent = 0#[int(round(n)) for n in psutil.cpu_percent(percpu=True)]
 
   # Power
-  if (not is_android()) or (is_android_rooted()):
-    try: # TODO: causes crash on android when providing power via panda.
-      battery = psutil.sensors_battery()
-      msg.deviceState.batteryPercent = int(battery.percent)
-      msg.deviceState.chargingDisabled = not battery.power_plugged
-    except:
-      pass
+  # if (not is_android()) or (is_android_rooted()):
+  #   try: # TODO: causes crash on android when providing power via panda.
+  #     battery = psutil.sensors_battery()
+  #     msg.deviceState.batteryPercent = int(battery.percent)
+  #     msg.deviceState.chargingDisabled = not battery.power_plugged
+  #   except:
+  #     pass
 
   # Device Thermals
-  temps = psutil.sensors_temperatures()
-  if temps.get("coretemp", None) is not None:
-    msg.deviceState.cpuTempC = [cpu.current for cpu in temps['coretemp']]
-  elif temps.get("battery", None) is not None:
-    msg.deviceState.cpuTempC = [bms.current for bms in temps['battery']]
-  else:
-    msg.deviceState.cpuTempC = [0.0]*8 # TODO: find a better way to get temps that works across platforms.
+  # temps = psutil.sensors_temperatures()
+  # if temps.get("coretemp", None) is not None:
+  #   msg.deviceState.cpuTempC = [cpu.current for cpu in temps['coretemp']]
+  # elif temps.get("battery", None) is not None:
+  #   msg.deviceState.cpuTempC = [bms.current for bms in temps['battery']]
+  # else:
+  msg.deviceState.cpuTempC = [0.0]*8 # TODO: find a better way to get temps that works across platforms.
   
   # desktops have bad temperature readings causing false positives.
   if not is_android():
