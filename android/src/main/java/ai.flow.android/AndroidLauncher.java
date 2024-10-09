@@ -48,12 +48,39 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
 
+import static android.app.PendingIntent.FLAG_MUTABLE;
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.hardware.usb.UsbDevice;
+import android.hardware.usb.UsbDeviceConnection;
+import android.hardware.usb.UsbManager;
+import android.os.Bundle;
+import android.util.Log;
+
+import ai.flow.python.ServiceCalibrationd;
+import ai.flow.python.ServiceControlsd;
+import ai.flow.python.ServiceKeyvald;
+import ai.flow.python.ServiceLogmessaged;
+import ai.flow.python.ServicePlannerd;
+import ai.flow.python.ServiceRadard;
+import ai.flow.python.ServiceThermald;
+
+import ai.flow.flowy.ServicePandad;
+import ai.flow.flowy.ServiceModelparsed;
+
 
 /** Launches the main android flowpilot application. */
 public class AndroidLauncher extends FragmentActivity implements AndroidFragmentApplication.Callbacks {
 	public static Map<String, SensorInterface> sensors;
 	public static Context appContext;
 	public static ParamsInterface params;
+
+	private static final String TAG = "AndroidLauncher";
+	private static final String ACTION_USB_PERMISSION = "com.android.example.USB_PERMISSION";
+    private BroadcastReceiver usbReceiver;
 
 	public void LoadIntrinsicsFromFile() {
 		File file = new File(Path.getFlowPilotRoot(), utils.F2 ? "camerainfo.medium.txt" : "camerainfo.big.txt");
@@ -104,7 +131,63 @@ public class AndroidLauncher extends FragmentActivity implements AndroidFragment
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		System.out.println("Inside launcher");
 		appContext = getApplicationContext();
+
+		usbReceiver = new BroadcastReceiver() {
+            public void onReceive(Context context, Intent intent) {
+                System.out.println("Receiving!");
+                String action = intent.getAction();
+                if (ACTION_USB_PERMISSION.equals(action)) {
+                    synchronized (this) {
+                        UsbDevice device = (UsbDevice)intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
+
+                        if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
+                            if(device != null) {
+                                // call method to set up device communication
+                                UsbManager usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
+                                UsbDeviceConnection usbDeviceConnection = usbManager.openDevice(device);
+                                Log.d(TAG, "permission granted for serial "+usbDeviceConnection.getSerial());
+                                ServicePandad.start(getApplicationContext(), usbDeviceConnection.getFileDescriptor());
+                            }
+                        }
+                        else {
+                            Log.d(TAG, "permission denied for device " + device);
+                        }
+                    }
+                }
+            }
+        };
+
+        UsbManager manager = (UsbManager) getSystemService(Context.USB_SERVICE);
+        Intent intent = new Intent(ACTION_USB_PERMISSION);
+        intent.setPackage(this.getPackageName());
+        PendingIntent permissionIntent = PendingIntent.getBroadcast(this, 0, intent, FLAG_MUTABLE);
+
+        IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
+        registerReceiver(usbReceiver, filter, Context.RECEIVER_EXPORTED);
+        HashMap<String, UsbDevice> deviceList = manager.getDeviceList();
+        for (UsbDevice usbDevice : deviceList.values())
+        {
+            manager.requestPermission(usbDevice, permissionIntent);
+        }
+
+		ServiceCalibrationd.prepare(this);
+		ServiceCalibrationd.start(this, "");
+		ServiceControlsd.prepare(this);
+		ServiceControlsd.start(this, "");
+		ServiceKeyvald.prepare(this);
+		ServiceKeyvald.start(this, "");
+		ServiceLogmessaged.prepare(this);
+		ServiceLogmessaged.start(this, "");
+		ServicePlannerd.prepare(this);
+		ServicePlannerd.start(this, "");
+		ServiceRadard.prepare(this);
+		ServiceRadard.start(this, "");
+		ServiceThermald.prepare(this);
+		ServiceThermald.start(this, "");
+
+		ServiceModelparsed.start(this);
 
 		// set environment variables from intent extras.
 		Bundle bundle = getIntent().getExtras();
@@ -157,8 +240,7 @@ public class AndroidLauncher extends FragmentActivity implements AndroidFragment
 		sensors = new HashMap<String, SensorInterface>() {{
 			put("roadCamera", finalCameraManager);
 			put("wideRoadCamera", finalCameraManager); // use same camera until we move away from wide camera-only mode.
-			put("motionSensors", sensorManager);
-		}};
+			put("motionSensors", sensorManager);		}};
 
 		int pid = Process.myPid();
 
