@@ -21,7 +21,7 @@ public class Params extends ParamsInterface {
         if (env != null) // Each process should have a single environment.
             return;
         env = new Env();
-        String home = System.getenv("HOME");
+        String home = "/data/data/ai.flow.android/files/app";
         String dbPath = home + "/.flowdrive/params";
         new File(dbPath).mkdirs();
         env.setMapSize(1024*1024*1024);
@@ -103,6 +103,7 @@ public class Params extends ParamsInterface {
 
     public String getString(String key){
         byte[] byteKey = bytes(key);
+        byte[] data = db.get(byteKey);
         return new String(db.get(byteKey));
     }
 

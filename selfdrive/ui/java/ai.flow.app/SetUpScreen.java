@@ -35,10 +35,13 @@ public class SetUpScreen extends ScreenAdapter {
             appContext.setScreen(new TrainingScreen(appContext));
             return;
         }*/
-
+       System.out.println("SetUpScreen 1");
         appContext.launcher.startSensorD();
+        System.out.println("SetUpScreen 2");
         appContext.launcher.startAllD();
+        System.out.println("SetUpScreen 3");
         appContext.setScreen(new IntroScreen(appContext));
+        System.out.println("SetUpScreen 4");
     }
 
     @Override

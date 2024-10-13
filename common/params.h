@@ -22,7 +22,7 @@ public:
   bool checkKey(const std::string &key);
   ParamKeyType getKeyType(const std::string &key);
   inline std::string getParamPath(const std::string &key = {}) {
-    return "/data/data/ai.flow.android/files/.flowdrive/params";
+    return "/data/data/ai.flow.android/files/app/.flowdrive/params";
   }
 
   // Delete a value

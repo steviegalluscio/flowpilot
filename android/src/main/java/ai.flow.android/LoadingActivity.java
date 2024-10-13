@@ -97,7 +97,9 @@ public class LoadingActivity extends AppCompatActivity {
                 // boot all the flowpilot daemons in non-java land.
                 // bootTermux();
 
+                System.out.println("Attempting to call ParamsInterface");
                 ParamsInterface params = ParamsInterface.getInstance();
+                System.out.println("I got out!");
 
                 bootComplete = true;
 

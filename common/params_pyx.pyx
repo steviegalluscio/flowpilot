@@ -82,8 +82,10 @@ cdef class Params:
     """
     cdef string k = self.check_key(key)
     cdef string dat_bytes = ensure_bytes(dat)
+    print("Params writing " + str(key) + " with length " + str(len(dat_bytes)))
     with nogil:
       self.p.put(k, dat_bytes)
+    # print(f"Done writing " + str(key))
 
   def put_bool(self, key, bool val):
     cdef string k = self.check_key(key)

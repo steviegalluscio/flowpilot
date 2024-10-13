@@ -326,7 +326,7 @@ public class OnRoadScreen extends ScreenAdapter {
     public OnRoadScreen(FlowUI appContext) {
         this.appContext = appContext;
 
-        PrepareDebugReader();
+        // PrepareDebugReader();
 
         soundAlerts = new HashMap<AudibleAlert, Sound>() {{
             put(AudibleAlert.ENGAGE, appContext.engageSound);
@@ -638,15 +638,10 @@ public class OnRoadScreen extends ScreenAdapter {
         }
     }
 
-    public void drawAlert(Definitions.ControlsState.Reader controlState, String forceAlert) {
+    public void drawAlert(Definitions.ControlsState.Reader controlState) {
         Definitions.ControlsState.AlertStatus alertStatus = null;
         Definitions.ControlsState.FlowpilotState state = null;
-        if (forceAlert != null) {
-            alertText1.setText(forceAlert);
-            alertText2.setText(forceAlert);
-            alertStatus = Definitions.ControlsState.AlertStatus.CRITICAL;
-            state = Definitions.ControlsState.FlowpilotState.DISABLED;
-        } else if (controlState != null) {
+        if (controlState != null) {
             alertText1.setText(controlState.getAlertText1().toString());
             alertText2.setText(controlState.getAlertText2().toString());
             alertStatus = controlState.getAlertStatus();
@@ -801,7 +796,7 @@ public class OnRoadScreen extends ScreenAdapter {
             if (sh.updated(carStateTopic))
                 updateCarState();
 
-            drawAlert(controlState, noDebugInfo);
+            drawAlert(controlState);
 
             stageUI.getViewport().apply();
             stageUI.draw();

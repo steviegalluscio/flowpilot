@@ -2,7 +2,7 @@ import os
 import enum
 from typing import List, NamedTuple
 
-BASEDIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../")
+BASEDIR = os.path.join("/Users/fgx/Developer/flowpilot/panda")
 FW_PATH = os.path.join(BASEDIR, "board/obj/")
 
 USBPACKET_MAX_SIZE = 0x40

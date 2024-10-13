@@ -33,6 +33,7 @@ public class FlowUI extends Game {
     public Launcher launcher;
     public Map<String, SensorInterface> sensors;
     public ModelExecutor modelExecutor;
+    public SensorInterface onroadManager;
     // reuse common screens
     public SettingsScreen settingsScreen;
     public OnRoadScreen onRoadScreen;
@@ -68,6 +69,7 @@ public class FlowUI extends Game {
                         if (!isOnRoad) {
                             modelExecutor.stop();
                         } else {
+                            launcher.managers.get("onroad").start();
                             OnRoadScreen.HideInfoTable = true;
                             modelExecutor.start();
                         }
@@ -129,6 +131,7 @@ public class FlowUI extends Game {
         params.putInt("FlowpilotPID", pid);
 
         updateOnroadThread.start();
+        System.out.println("FlowUi create 1");
 
         if (Gdx.gl != null) { // else headless mode
             shapeRenderer = new ShapeRenderer();
@@ -142,15 +145,18 @@ public class FlowUI extends Game {
             loadSounds();
             skin.load(Gdx.files.absolute(Path.internal("selfdrive/assets/skins/uiskin.json")));
 
+            System.out.println("FlowUi create 2");
             settingsScreen = new SettingsScreen(this);
             onRoadScreen = new OnRoadScreen(this);
 
             setScreen(new SetUpScreen(this));
         }
         else{
+            System.out.println("FlowUi create 3");
             launcher.startSensorD();
             launcher.startAllD();
         }
+        System.out.println("FlowUi create 4");
     }
 
     @Override

@@ -55,6 +55,8 @@ ACTUATOR_FIELDS = tuple(car.CarControl.Actuators.schema.fields.keys())
 ACTIVE_STATES = (State.enabled, State.softDisabling, State.overriding)
 ENABLED_STATES = (State.preEnabled, *ACTIVE_STATES)
 
+can_sends_total = 0
+
 
 class Controls:
   def __init__(self, sm=None, pm=None, can_sock=None, CI=None):

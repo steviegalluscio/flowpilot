@@ -83,6 +83,7 @@ PandaUsbHandle::PandaUsbHandle(int fd) : PandaCommsHandle(fd) {
   // init libusb
   libusb_device *device = NULL;
   int ret;
+  libusb_set_option(ctx, LIBUSB_OPTION_NO_DEVICE_DISCOVERY, NULL);
   int err = init_usb_ctx(&ctx);
   if (err != 0) { goto fail; }
 

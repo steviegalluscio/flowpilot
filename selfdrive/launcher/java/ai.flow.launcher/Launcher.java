@@ -16,13 +16,16 @@ import java.util.Map;
 public class Launcher {
     public ModelExecutor modeld;
     public Map<String, SensorInterface> sensors;
+    public Map<String, SensorInterface> managers;
     // public FlowInitd flowInitd = new FlowInitd();
     public ParamsInterface params = ParamsInterface.getInstance();
     SensorInterface cameraManager;
+    SensorInterface pandaManager;
 
-    public Launcher(Map<String, SensorInterface> sensors, ModelExecutor modelExecutor){
+    public Launcher(Map<String, SensorInterface> sensors, ModelExecutor modelExecutor, Map<String, SensorInterface> managers){
         this.sensors = sensors;
         this.modeld = modelExecutor;
+        this.managers = managers;
     }
 
     public void initModelD() {
@@ -31,8 +34,10 @@ public class Launcher {
 
     public void startSensorD() {
         for (String sensorName : sensors.keySet()) {
+            System.out.println("startSensorD " + sensorName);
             if (!sensors.get(sensorName).isRunning())
                 sensors.get(sensorName).start();
+            System.out.println("startSensorD ret");
         }
     }
 
@@ -45,8 +50,13 @@ public class Launcher {
     }
 
     public void startAllD() {
+        System.out.println("startAllD 1");
         startSensorD();
+        System.out.println("startAllD 2");
         initModelD();
+        System.out.println("startAllD 3");
+        this.managers.get("panda").start();
+        System.out.println("startAllD 4");
     }
 
     public void main(String[] args) {

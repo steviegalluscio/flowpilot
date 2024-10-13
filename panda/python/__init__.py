@@ -518,6 +518,7 @@ class Panda:
       pass
 
   def flash(self, fn=None, code=None, reconnect=True):
+    print("Im looking in "+FW_PATH)
     if not fn:
       fn = os.path.join(FW_PATH, self._mcu_type.config.app_fn)
     assert os.path.isfile(fn)
