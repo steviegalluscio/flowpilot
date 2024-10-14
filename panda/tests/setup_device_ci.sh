@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/usr/bin/env bash
 
 set -e
 
@@ -19,13 +19,12 @@ fi
 
 CONTINUE_PATH="/data/continue.sh"
 tee $CONTINUE_PATH << EOF
-#!/usr/bin/bash
+#!/usr/bin/env bash
 
 sudo abctl --set_success
 
 # patch sshd config
 sudo mount -o rw,remount /
-echo tici-$(cat /proc/cmdline | sed -e 's/^.*androidboot.serialno=//' -e 's/ .*$//') | sudo tee /etc/hostname
 sudo sed -i "s,/data/params/d/GithubSshKeys,/usr/comma/setup_keys," /etc/ssh/sshd_config
 sudo systemctl daemon-reload
 sudo systemctl restart ssh

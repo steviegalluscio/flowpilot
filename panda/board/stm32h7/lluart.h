@@ -1,9 +1,4 @@
-#define __DIV(_PCLK_, _BAUD_)                    (((_PCLK_) * 25U) / (4U * (_BAUD_)))
-#define __DIVMANT(_PCLK_, _BAUD_)                (__DIV((_PCLK_), (_BAUD_)) / 100U)
-#define __DIVFRAQ(_PCLK_, _BAUD_)                ((((__DIV((_PCLK_), (_BAUD_)) - (__DIVMANT((_PCLK_), (_BAUD_)) * 100U)) * 16U) + 50U) / 100U)
-#define __USART_BRR(_PCLK_, _BAUD_)              ((__DIVMANT((_PCLK_), (_BAUD_)) << 4) | (__DIVFRAQ((_PCLK_), (_BAUD_)) & 0x0FU))
-
-void uart_rx_ring(uart_ring *q){
+static void uart_rx_ring(uart_ring *q){
   // Do not read out directly if DMA enabled
   ENTER_CRITICAL();
 
@@ -34,7 +29,7 @@ void uart_tx_ring(uart_ring *q){
   // Send out next byte of TX buffer
   if (q->w_ptr_tx != q->r_ptr_tx) {
     // Only send if transmit register is empty (aka last byte has been sent)
-    if ((q->uart->ISR & USART_ISR_TXE_TXFNF) != 0) {
+    if ((q->uart->ISR & USART_ISR_TXE_TXFNF) != 0U) {
       q->uart->TDR = q->elems_tx[q->r_ptr_tx];   // This clears TXE
       q->r_ptr_tx = (q->r_ptr_tx + 1U) % q->tx_fifo_size;
     }
@@ -57,7 +52,7 @@ void uart_set_baud(USART_TypeDef *u, unsigned int baud) {
 // This read after reading ISR clears all error interrupts. We don't want compiler warnings, nor optimizations
 #define UART_READ_RDR(uart) volatile uint8_t t = (uart)->RDR; UNUSED(t);
 
-void uart_interrupt_handler(uart_ring *q) {
+static void uart_interrupt_handler(uart_ring *q) {
   ENTER_CRITICAL();
 
   // Read UART status. This is also the first step necessary in clearing most interrupts
@@ -93,7 +88,7 @@ void uart_interrupt_handler(uart_ring *q) {
   EXIT_CRITICAL();
 }
 
-void UART7_IRQ_Handler(void) { uart_interrupt_handler(&uart_ring_som_debug); }
+static void UART7_IRQ_Handler(void) { uart_interrupt_handler(&uart_ring_som_debug); }
 
 void uart_init(uart_ring *q, int baud) {
   if (q->uart == UART7) {

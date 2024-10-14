@@ -1,24 +1,7 @@
+#pragma once
+
+#include "safety_declarations.h"
 #include "safety_volkswagen_common.h"
-
-// lateral limits
-const SteeringLimits VOLKSWAGEN_PQ_STEERING_LIMITS = {
-  .max_steer = 300,                // 3.0 Nm (EPS side max of 3.0Nm with fault if violated)
-  .max_rt_delta = 113,             // 6 max rate up * 50Hz send rate * 250000 RT interval / 1000000 = 75 ; 125 * 1.5 for safety pad = 113
-  .max_rt_interval = 250000,       // 250ms between real time checks
-  .max_rate_up = 6,                // 3.0 Nm/s RoC limit (EPS rack has own soft-limit of 5.0 Nm/s)
-  .max_rate_down = 10,             // 5.0 Nm/s RoC limit (EPS rack has own soft-limit of 5.0 Nm/s)
-  .driver_torque_factor = 3,
-  .driver_torque_allowance = 80,
-  .type = TorqueDriverLimited,
-};
-
-// longitudinal limits
-// acceleration in m/s2 * 1000 to avoid floating point math
-const LongitudinalLimits VOLKSWAGEN_PQ_LONG_LIMITS = {
-  .max_accel = 2000,
-  .min_accel = -3500,
-  .inactive_accel = 3010,  // VW sends one increment above the max range when inactive
-};
 
 #define MSG_LENKHILFE_3         0x0D0   // RX from EPS, for steering angle and driver steering torque
 #define MSG_HCA_1               0x0D2   // TX by OP, Heading Control Assist steering torque
@@ -31,30 +14,13 @@ const LongitudinalLimits VOLKSWAGEN_PQ_LONG_LIMITS = {
 #define MSG_ACC_GRA_ANZEIGE     0x56A   // TX by OP, ACC HUD
 #define MSG_LDW_1               0x5BE   // TX by OP, Lane line recognition and text alerts
 
-// Transmit of GRA_Neu is allowed on bus 0 and 2 to keep compatibility with gateway and camera integration
-const CanMsg VOLKSWAGEN_PQ_STOCK_TX_MSGS[] = {{MSG_HCA_1, 0, 5}, {MSG_LDW_1, 0, 8},
-                                              {MSG_GRA_NEU, 0, 4}, {MSG_GRA_NEU, 2, 4}};
-const CanMsg VOLKSWAGEN_PQ_LONG_TX_MSGS[] =  {{MSG_HCA_1, 0, 5}, {MSG_LDW_1, 0, 8},
-                                              {MSG_ACC_SYSTEM, 0, 8}, {MSG_ACC_GRA_ANZEIGE, 0, 8}};
-
-AddrCheckStruct volkswagen_pq_addr_checks[] = {
-  {.msg = {{MSG_LENKHILFE_3, 0, 6, .check_checksum = true, .max_counter = 15U, .expected_timestep = 10000U}, { 0 }, { 0 }}},
-  {.msg = {{MSG_BREMSE_1, 0, 8, .check_checksum = false, .max_counter = 0U, .expected_timestep = 10000U}, { 0 }, { 0 }}},
-  {.msg = {{MSG_MOTOR_2, 0, 8, .check_checksum = false, .max_counter = 0U, .expected_timestep = 20000U}, { 0 }, { 0 }}},
-  {.msg = {{MSG_MOTOR_3, 0, 8, .check_checksum = false, .max_counter = 0U, .expected_timestep = 10000U}, { 0 }, { 0 }}},
-  {.msg = {{MSG_MOTOR_5, 0, 8, .check_checksum = true, .max_counter = 0U, .expected_timestep = 20000U}, { 0 }, { 0 }}},
-  {.msg = {{MSG_GRA_NEU, 0, 4, .check_checksum = true, .max_counter = 15U, .expected_timestep = 33000U}, { 0 }, { 0 }}},
-};
-#define VOLKSWAGEN_PQ_ADDR_CHECKS_LEN (sizeof(volkswagen_pq_addr_checks) / sizeof(volkswagen_pq_addr_checks[0]))
-addr_checks volkswagen_pq_rx_checks = {volkswagen_pq_addr_checks, VOLKSWAGEN_PQ_ADDR_CHECKS_LEN};
-
-static uint32_t volkswagen_pq_get_checksum(CANPacket_t *to_push) {
+static uint32_t volkswagen_pq_get_checksum(const CANPacket_t *to_push) {
   int addr = GET_ADDR(to_push);
 
   return (uint32_t)GET_BYTE(to_push, (addr == MSG_MOTOR_5) ? 7 : 0);
 }
 
-static uint8_t volkswagen_pq_get_counter(CANPacket_t *to_push) {
+static uint8_t volkswagen_pq_get_counter(const CANPacket_t *to_push) {
   int addr = GET_ADDR(to_push);
   uint8_t counter = 0U;
 
@@ -63,13 +29,12 @@ static uint8_t volkswagen_pq_get_counter(CANPacket_t *to_push) {
   } else if (addr == MSG_GRA_NEU) {
     counter = (uint8_t)(GET_BYTE(to_push, 2) & 0xF0U) >> 4;
   } else {
-    counter = 0U;
   }
 
   return counter;
 }
 
-static uint32_t volkswagen_pq_compute_checksum(CANPacket_t *to_push) {
+static uint32_t volkswagen_pq_compute_checksum(const CANPacket_t *to_push) {
   int addr = GET_ADDR(to_push);
   int len = GET_LEN(to_push);
   uint8_t checksum = 0U;
@@ -85,7 +50,23 @@ static uint32_t volkswagen_pq_compute_checksum(CANPacket_t *to_push) {
   return checksum;
 }
 
-static const addr_checks* volkswagen_pq_init(uint16_t param) {
+static safety_config volkswagen_pq_init(uint16_t param) {
+  // Transmit of GRA_Neu is allowed on bus 0 and 2 to keep compatibility with gateway and camera integration
+  static const CanMsg VOLKSWAGEN_PQ_STOCK_TX_MSGS[] = {{MSG_HCA_1, 0, 5}, {MSG_LDW_1, 0, 8},
+                                                {MSG_GRA_NEU, 0, 4}, {MSG_GRA_NEU, 2, 4}};
+
+  static const CanMsg VOLKSWAGEN_PQ_LONG_TX_MSGS[] =  {{MSG_HCA_1, 0, 5}, {MSG_LDW_1, 0, 8},
+                                                {MSG_ACC_SYSTEM, 0, 8}, {MSG_ACC_GRA_ANZEIGE, 0, 8}};
+
+  static RxCheck volkswagen_pq_rx_checks[] = {
+    {.msg = {{MSG_LENKHILFE_3, 0, 6, .check_checksum = true, .max_counter = 15U, .frequency = 100U}, { 0 }, { 0 }}},
+    {.msg = {{MSG_BREMSE_1, 0, 8, .check_checksum = false, .max_counter = 0U, .frequency = 100U}, { 0 }, { 0 }}},
+    {.msg = {{MSG_MOTOR_2, 0, 8, .check_checksum = false, .max_counter = 0U, .frequency = 50U}, { 0 }, { 0 }}},
+    {.msg = {{MSG_MOTOR_3, 0, 8, .check_checksum = false, .max_counter = 0U, .frequency = 100U}, { 0 }, { 0 }}},
+    {.msg = {{MSG_MOTOR_5, 0, 8, .check_checksum = true, .max_counter = 0U, .frequency = 50U}, { 0 }, { 0 }}},
+    {.msg = {{MSG_GRA_NEU, 0, 4, .check_checksum = true, .max_counter = 15U, .frequency = 30U}, { 0 }, { 0 }}},
+  };
+
   UNUSED(param);
 
   volkswagen_set_button_prev = false;
@@ -94,15 +75,12 @@ static const addr_checks* volkswagen_pq_init(uint16_t param) {
 #ifdef ALLOW_DEBUG
   volkswagen_longitudinal = GET_FLAG(param, FLAG_VOLKSWAGEN_LONG_CONTROL);
 #endif
-  return &volkswagen_pq_rx_checks;
+  return volkswagen_longitudinal ? BUILD_SAFETY_CFG(volkswagen_pq_rx_checks, VOLKSWAGEN_PQ_LONG_TX_MSGS) : \
+                                   BUILD_SAFETY_CFG(volkswagen_pq_rx_checks, VOLKSWAGEN_PQ_STOCK_TX_MSGS);
 }
 
-static int volkswagen_pq_rx_hook(CANPacket_t *to_push) {
-
-  bool valid = addr_safety_check(to_push, &volkswagen_pq_rx_checks,
-                                volkswagen_pq_get_checksum, volkswagen_pq_compute_checksum, volkswagen_pq_get_counter, NULL);
-
-  if (valid && (GET_BUS(to_push) == 0U)) {
+static void volkswagen_pq_rx_hook(const CANPacket_t *to_push) {
+  if (GET_BUS(to_push) == 0U) {
     int addr = GET_ADDR(to_push);
 
     // Update in-motion state from speed value.
@@ -130,7 +108,7 @@ static int volkswagen_pq_rx_hook(CANPacket_t *to_push) {
         // Signal: Motor_5.GRA_Hauptschalter
         acc_main_on = GET_BIT(to_push, 50U);
         if (!acc_main_on) {
-          controls_allowed = 0;
+          controls_allowed = false;
         }
       }
 
@@ -147,8 +125,8 @@ static int volkswagen_pq_rx_hook(CANPacket_t *to_push) {
         volkswagen_resume_button_prev = resume_button;
         // Exit controls on rising edge of Cancel, override Set/Resume if present simultaneously
         // Signal: GRA_ACC_01.GRA_Abbrechen
-        if (GET_BIT(to_push, 9U) == 1U) {
-          controls_allowed = 0;
+        if (GET_BIT(to_push, 9U)) {
+          controls_allowed = false;
         }
       }
     } else {
@@ -173,18 +151,31 @@ static int volkswagen_pq_rx_hook(CANPacket_t *to_push) {
 
     generic_rx_checks((addr == MSG_HCA_1));
   }
-  return valid;
 }
 
-static int volkswagen_pq_tx_hook(CANPacket_t *to_send) {
-  int addr = GET_ADDR(to_send);
-  int tx = 1;
+static bool volkswagen_pq_tx_hook(const CANPacket_t *to_send) {
+  // lateral limits
+  const SteeringLimits VOLKSWAGEN_PQ_STEERING_LIMITS = {
+    .max_steer = 300,                // 3.0 Nm (EPS side max of 3.0Nm with fault if violated)
+    .max_rt_delta = 113,             // 6 max rate up * 50Hz send rate * 250000 RT interval / 1000000 = 75 ; 125 * 1.5 for safety pad = 113
+    .max_rt_interval = 250000,       // 250ms between real time checks
+    .max_rate_up = 6,                // 3.0 Nm/s RoC limit (EPS rack has own soft-limit of 5.0 Nm/s)
+    .max_rate_down = 10,             // 5.0 Nm/s RoC limit (EPS rack has own soft-limit of 5.0 Nm/s)
+    .driver_torque_factor = 3,
+    .driver_torque_allowance = 80,
+    .type = TorqueDriverLimited,
+  };
 
-  if (volkswagen_longitudinal) {
-    tx = msg_allowed(to_send, VOLKSWAGEN_PQ_LONG_TX_MSGS, sizeof(VOLKSWAGEN_PQ_LONG_TX_MSGS) / sizeof(VOLKSWAGEN_PQ_LONG_TX_MSGS[0]));
-  } else {
-    tx = msg_allowed(to_send, VOLKSWAGEN_PQ_STOCK_TX_MSGS, sizeof(VOLKSWAGEN_PQ_STOCK_TX_MSGS) / sizeof(VOLKSWAGEN_PQ_STOCK_TX_MSGS[0]));
-  }
+  // longitudinal limits
+  // acceleration in m/s2 * 1000 to avoid floating point math
+  const LongitudinalLimits VOLKSWAGEN_PQ_LONG_LIMITS = {
+    .max_accel = 2000,
+    .min_accel = -3500,
+    .inactive_accel = 3010,  // VW sends one increment above the max range when inactive
+  };
+
+  int addr = GET_ADDR(to_send);
+  bool tx = true;
 
   // Safety check for HCA_1 Heading Control Assist torque
   // Signal: HCA_1.LM_Offset (absolute torque)
@@ -197,8 +188,11 @@ static int volkswagen_pq_tx_hook(CANPacket_t *to_send) {
       desired_torque *= -1;
     }
 
-    if (steer_torque_cmd_checks(desired_torque, -1, VOLKSWAGEN_PQ_STEERING_LIMITS)) {
-      tx = 0;
+    uint32_t hca_status = ((GET_BYTE(to_send, 1) >> 4) & 0xFU);
+    bool steer_req = ((hca_status == 5U) || (hca_status == 7U));
+
+    if (steer_torque_cmd_checks(desired_torque, steer_req, VOLKSWAGEN_PQ_STEERING_LIMITS)) {
+      tx = false;
     }
   }
 
@@ -209,7 +203,7 @@ static int volkswagen_pq_tx_hook(CANPacket_t *to_send) {
     int desired_accel = ((((GET_BYTE(to_send, 4) & 0x7U) << 8) | GET_BYTE(to_send, 3)) * 5U) - 7220U;
 
     if (longitudinal_accel_checks(desired_accel, VOLKSWAGEN_PQ_LONG_LIMITS)) {
-      tx = 0;
+      tx = false;
     }
   }
 
@@ -219,11 +213,10 @@ static int volkswagen_pq_tx_hook(CANPacket_t *to_send) {
     // Signal: GRA_Neu.GRA_Neu_Setzen
     // Signal: GRA_Neu.GRA_Neu_Recall
     if (GET_BIT(to_send, 16U) || GET_BIT(to_send, 17U)) {
-      tx = 0;
+      tx = false;
     }
   }
 
-  // 1 allows the message through
   return tx;
 }
 
@@ -259,6 +252,8 @@ const safety_hooks volkswagen_pq_hooks = {
   .init = volkswagen_pq_init,
   .rx = volkswagen_pq_rx_hook,
   .tx = volkswagen_pq_tx_hook,
-  .tx_lin = nooutput_tx_lin_hook,
   .fwd = volkswagen_pq_fwd_hook,
+  .get_counter = volkswagen_pq_get_counter,
+  .get_checksum = volkswagen_pq_get_checksum,
+  .compute_checksum = volkswagen_pq_compute_checksum,
 };

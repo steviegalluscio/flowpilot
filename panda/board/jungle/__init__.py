@@ -2,7 +2,6 @@
 import os
 import struct
 from functools import wraps
-from typing import Optional
 
 from panda import Panda, PandaDFU
 from panda.python.constants import McuType
@@ -50,14 +49,14 @@ class PandaJungle(Panda):
 
   @classmethod
   def spi_connect(cls, serial, ignore_version=False):
-    return None, None, None, None
+    return None, None, None, None, None
 
   def flash(self, fn=None, code=None, reconnect=True):
     if not fn:
       fn = os.path.join(FW_PATH, self._mcu_type.config.app_fn.replace("panda", "panda_jungle"))
     super().flash(fn=fn, code=code, reconnect=reconnect)
 
-  def recover(self, timeout: Optional[int] = 60, reset: bool = True) -> bool:
+  def recover(self, timeout: int | None = 60, reset: bool = True) -> bool:
     dfu_serial = self.get_dfu_serial()
 
     if reset:
@@ -81,13 +80,18 @@ class PandaJungle(Panda):
       return McuType.F4
     elif hw_type in PandaJungle.H7_DEVICES:
       return McuType.H7
+    else:
+      # have to assume F4, see comment in Panda.connect
+      # initially Jungle V1 has HW type: bytearray(b'')
+      if hw_type == b'' or self._assume_f4_mcu:
+        return McuType.F4
+
     raise ValueError(f"unknown HW type: {hw_type}")
 
-  def up_to_date(self) -> bool:
-    current = self.get_signature()
-    fn = os.path.join(FW_PATH, self.get_mcu_type().config.app_fn.replace("panda", "panda_jungle"))
-    expected = Panda.get_signature_from_firmware(fn)
-    return (current == expected)
+  def up_to_date(self, fn=None) -> bool:
+    if fn is None:
+      fn = os.path.join(FW_PATH, self.get_mcu_type().config.app_fn.replace("panda", "panda_jungle"))
+    return super().up_to_date(fn=fn)
 
   # ******************* health *******************
 
@@ -132,6 +136,9 @@ class PandaJungle(Panda):
   def set_panda_power(self, enabled):
     self._handle.controlWrite(PandaJungle.REQUEST_OUT, 0xa0, int(enabled), 0, b'')
 
+  def set_panda_individual_power(self, port, enabled):
+    self._handle.controlWrite(PandaJungle.REQUEST_OUT, 0xa3, int(port), int(enabled), b'')
+
   def set_harness_orientation(self, mode):
     self._handle.controlWrite(PandaJungle.REQUEST_OUT, 0xa1, int(mode), 0, b'')
 
@@ -140,6 +147,9 @@ class PandaJungle(Panda):
 
   def set_can_silent(self, silent):
     self._handle.controlWrite(PandaJungle.REQUEST_OUT, 0xf5, int(silent), 0, b'')
+
+  def set_generated_can(self, enabled):
+    self._handle.controlWrite(PandaJungle.REQUEST_OUT, 0xa4, int(enabled), 0, b'')
 
   # ******************* serial *******************
 
@@ -151,3 +161,8 @@ class PandaJungle(Panda):
         break
       ret.append(lret)
     return b''.join(ret)
+
+  # ******************* header pins *******************
+
+  def set_header_pin(self, pin_num, enabled):
+    self._handle.controlWrite(Panda.REQUEST_OUT, 0xf7, int(pin_num), int(enabled), b'')

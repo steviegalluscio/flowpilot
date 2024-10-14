@@ -1,4 +1,3 @@
-from typing import Tuple
 import unittest
 
 import panda.tests.safety.common as common
@@ -77,8 +76,8 @@ class HyundaiButtonBase:
 class HyundaiLongitudinalBase(common.LongitudinalAccelSafetyTest):
   # pylint: disable=no-member,abstract-method
 
-  DISABLED_ECU_UDS_MSG: Tuple[int, int]
-  DISABLED_ECU_ACTUATION_MSG: Tuple[int, int]
+  DISABLED_ECU_UDS_MSG: tuple[int, int]
+  DISABLED_ECU_ACTUATION_MSG: tuple[int, int]
 
   @classmethod
   def setUpClass(cls):
@@ -86,7 +85,7 @@ class HyundaiLongitudinalBase(common.LongitudinalAccelSafetyTest):
       cls.safety = None
       raise unittest.SkipTest
 
-  # override these tests from PandaSafetyTest, hyundai longitudinal uses button enable
+  # override these tests from PandaCarSafetyTest, hyundai longitudinal uses button enable
   def test_disable_control_allowed_from_cruise(self):
     pass
 

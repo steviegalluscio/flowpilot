@@ -14,6 +14,8 @@
 #include "selfdrive/modeld/models/driving.h"
 #include "common/util.h"
 
+#include <jni.h>
+
 //#define USE_SOCKETS
 
 using namespace std;
@@ -99,7 +101,7 @@ int getServerSocket(int port) {
 ExitHandler do_exit;
 float model_raw_preds[NET_OUTPUT_SIZE];
 
-int main(int argc, char **argv) {
+void modelparsed_main() {
 
   PubMaster pm({"modelV2", "cameraOdometry"});
 
@@ -163,5 +165,15 @@ int main(int argc, char **argv) {
 #endif
 
   }
+}
+
+int main(int argc, char **argv) {
+  modelparsed_main();
   return 0;
+}
+
+extern "C" {
+JNIEXPORT void Java_ai_flow_flowy_ServiceModelparsed_nativeInit(JNIEnv* env, jclass cls, jint fd) {
+  modelparsed_main();
+}
 }

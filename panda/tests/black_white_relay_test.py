@@ -5,13 +5,11 @@
 
 
 import os
-import sys
 import time
 import random
 import argparse
 
-sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), ".."))
-from panda import Panda  # noqa: E402
+from panda import Panda
 
 def get_test_string():
   return b"test" + os.urandom(10)
@@ -88,7 +86,7 @@ def test_buses(black_panda, other_panda, test_obj):
   other_panda.send_heartbeat()
 
   # Set OBD on send panda
-  other_panda.set_gmlan(True if obd else None)
+  other_panda.set_obd(True if obd else None)
 
   # clear and flush
   other_panda.can_clear(send_bus)
@@ -111,9 +109,9 @@ def test_buses(black_panda, other_panda, test_obj):
 
   loop_buses = []
   for loop in cans_loop:
-    if (loop[0] != at) or (loop[2] != st):
+    if (loop[0] != at) or (loop[1] != st):
       content_errors += 1
-    loop_buses.append(loop[3])
+    loop_buses.append(loop[2])
 
   # test loop buses
   recv_buses.sort()

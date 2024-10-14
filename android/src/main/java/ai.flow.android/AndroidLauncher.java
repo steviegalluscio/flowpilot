@@ -126,6 +126,9 @@ public class AndroidLauncher extends FragmentActivity implements AndroidFragment
 
 		System.out.println("launch 2");
 
+		ServiceFlowreset.prepare(getApplication().getApplicationContext());
+		ServiceFlowreset.start(getApplication().getApplicationContext(), "");
+
 		ServiceKeyvald.prepare(getApplication().getApplicationContext());
 		ServiceKeyvald.start(getApplication().getApplicationContext(), "");
 		ServiceLogmessaged.prepare(getApplication().getApplicationContext());
@@ -144,13 +147,10 @@ public class AndroidLauncher extends FragmentActivity implements AndroidFragment
 		ServiceCalibrationd.prepare(getApplication().getApplicationContext());
 		ServicePlannerd.prepare(getApplication().getApplicationContext());
 
-		ServiceFlowreset.prepare(getApplication().getApplicationContext());
-		ServiceFlowreset.start(getApplication().getApplicationContext(), "");
-
-		ServiceModelparsed.start(getApplication().getApplicationContext());
-		ServiceRadard.start(getApplication().getApplicationContext(), "");
-		ServiceCalibrationd.start(getApplication().getApplicationContext(), "");
-		ServicePlannerd.start(getApplication().getApplicationContext(), "");
+		// ServiceModelparsed.start(getApplication().getApplicationContext());
+		// ServiceRadard.start(getApplication().getApplicationContext(), "");
+		// ServiceCalibrationd.start(getApplication().getApplicationContext(), "");
+		// ServicePlannerd.start(getApplication().getApplicationContext(), "");
 		
 		System.out.println("launch 3");
 

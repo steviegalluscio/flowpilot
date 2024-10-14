@@ -1,8 +1,7 @@
+#include "power_saving_declarations.h"
+
 // WARNING: To stay in compliance with the SIL2 rules laid out in STM UM1840, we should never implement any of the available hardware low power modes.
 // See rule: CoU_3
-
-#define POWER_SAVE_STATUS_DISABLED 0
-#define POWER_SAVE_STATUS_ENABLED 1
 
 int power_save_status = POWER_SAVE_STATUS_DISABLED;
 
@@ -35,18 +34,6 @@ void set_power_save_state(int state) {
     }
 
     current_board->enable_can_transceivers(enable);
-
-    if(current_board->has_hw_gmlan){
-      // turn on GMLAN
-      set_gpio_output(GPIOB, 14, enable);
-      set_gpio_output(GPIOB, 15, enable);
-    }
-
-    if(current_board->has_lin){
-      // turn on LIN
-      set_gpio_output(GPIOB, 7, enable);
-      set_gpio_output(GPIOA, 14, enable);
-    }
 
     // Switch off IR when in power saving
     if(!enable){

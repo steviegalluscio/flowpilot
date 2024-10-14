@@ -1,10 +1,14 @@
-// ///////////////////// //
-// Red Panda chiplet + Harness //
-// ///////////////////// //
+#pragma once
+
+#include "board_declarations.h"
+
+// ///////////////////////////////////// //
+// Red Panda chiplet (STM32H7) + Harness //
+// ///////////////////////////////////// //
 
 // Most hardware functionality is similar to red panda
 
-void red_chiplet_enable_can_transceiver(uint8_t transceiver, bool enabled) {
+static void red_chiplet_enable_can_transceiver(uint8_t transceiver, bool enabled) {
   switch (transceiver) {
     case 1U:
       set_gpio_output(GPIOG, 11, !enabled);
@@ -23,7 +27,7 @@ void red_chiplet_enable_can_transceiver(uint8_t transceiver, bool enabled) {
   }
 }
 
-void red_chiplet_enable_can_transceivers(bool enabled) {
+static void red_chiplet_enable_can_transceivers(bool enabled) {
   uint8_t main_bus = (harness.status == HARNESS_STATUS_FLIPPED) ? 3U : 1U;
   for (uint8_t i=1U; i<=4U; i++) {
     // Leave main CAN always on for CAN-based ignition detection
@@ -35,7 +39,7 @@ void red_chiplet_enable_can_transceivers(bool enabled) {
   }
 }
 
-void red_chiplet_set_can_mode(uint8_t mode) {
+static void red_chiplet_set_can_mode(uint8_t mode) {
   red_chiplet_enable_can_transceiver(2U, false);
   red_chiplet_enable_can_transceiver(4U, false);
   switch (mode) {
@@ -77,11 +81,11 @@ void red_chiplet_set_can_mode(uint8_t mode) {
   }
 }
 
-void red_chiplet_set_fan_or_usb_load_switch(bool enabled) {
+static void red_chiplet_set_fan_or_usb_load_switch(bool enabled) {
   set_gpio_output(GPIOD, 3, enabled);
 }
 
-void red_chiplet_init(void) {
+static void red_chiplet_init(void) {
   common_init_gpio();
 
   // A8, A3: OBD_SBU1_RELAY, OBD_SBU2_RELAY
@@ -119,8 +123,6 @@ void red_chiplet_init(void) {
   // Initialize harness
   harness_init();
 
-  // Initialize RTC
-  rtc_init();
 
   // Enable CAN transceivers
   red_chiplet_enable_can_transceivers(true);
@@ -132,14 +134,9 @@ void red_chiplet_init(void) {
 
   // Set normal CAN mode
   red_chiplet_set_can_mode(CAN_MODE_NORMAL);
-
-  // flip CAN0 and CAN2 if we are flipped
-  if (harness.status == HARNESS_STATUS_FLIPPED) {
-    can_flip_buses(0, 2);
-  }
 }
 
-const harness_configuration red_chiplet_harness_config = {
+static harness_configuration red_chiplet_harness_config = {
   .has_harness = true,
   .GPIO_SBU1 = GPIOC,
   .GPIO_SBU2 = GPIOA,

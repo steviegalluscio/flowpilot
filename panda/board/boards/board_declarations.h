@@ -1,4 +1,15 @@
+#pragma once
+
+#include <stdint.h>
+#include <stdbool.h>
+
 // ******************** Prototypes ********************
+typedef enum {
+  BOOT_STANDBY,
+  BOOT_BOOTKICK,
+  BOOT_RESET,
+} BootState;
+
 typedef void (*board_init)(void);
 typedef void (*board_init_bootloader)(void);
 typedef void (*board_enable_can_transceiver)(uint8_t transceiver, bool enabled);
@@ -6,27 +17,24 @@ typedef void (*board_enable_can_transceivers)(bool enabled);
 typedef void (*board_set_led)(uint8_t color, bool enabled);
 typedef void (*board_set_can_mode)(uint8_t mode);
 typedef bool (*board_check_ignition)(void);
-typedef uint32_t (*board_read_current)(void);
+typedef uint32_t (*board_read_voltage_mV)(void);
+typedef uint32_t (*board_read_current_mA)(void);
 typedef void (*board_set_ir_power)(uint8_t percentage);
 typedef void (*board_set_fan_enabled)(bool enabled);
-typedef void (*board_set_phone_power)(bool enabled);
 typedef void (*board_set_siren)(bool enabled);
-typedef bool (*board_board_tick)(bool ignition, bool usb_enum, bool heartbeat_seen, bool harness_inserted);
+typedef void (*board_set_bootkick)(BootState state);
 typedef bool (*board_read_som_gpio)(void);
 
 struct board {
-  const char *board_type;
-  const harness_configuration *harness_config;
-  const bool has_hw_gmlan;
+  harness_configuration *harness_config;
   const bool has_obd;
-  const bool has_lin;
   const bool has_spi;
   const bool has_canfd;
-  const bool has_rtc_battery;
   const uint16_t fan_max_rpm;
   const uint16_t avdd_mV;
   const bool fan_stall_recovery;
   const uint8_t fan_enable_cooldown_time;
+  const uint8_t fan_max_pwm;
   board_init init;
   board_init_bootloader init_bootloader;
   board_enable_can_transceiver enable_can_transceiver;
@@ -34,12 +42,12 @@ struct board {
   board_set_led set_led;
   board_set_can_mode set_can_mode;
   board_check_ignition check_ignition;
-  board_read_current read_current;
+  board_read_voltage_mV read_voltage_mV;
+  board_read_current_mA read_current_mA;
   board_set_ir_power set_ir_power;
   board_set_fan_enabled set_fan_enabled;
-  board_set_phone_power set_phone_power;
   board_set_siren set_siren;
-  board_board_tick board_tick;
+  board_set_bootkick set_bootkick;
   board_read_som_gpio read_som_gpio;
 };
 
@@ -55,6 +63,7 @@ struct board {
 #define HW_TYPE_RED_PANDA 7U
 #define HW_TYPE_RED_PANDA_V2 8U
 #define HW_TYPE_TRES 9U
+#define HW_TYPE_CUATRO 10U
 
 // LED colors
 #define LED_RED 0U
@@ -69,6 +78,13 @@ struct board {
 
 // CAN modes
 #define CAN_MODE_NORMAL 0U
-#define CAN_MODE_GMLAN_CAN2 1U
-#define CAN_MODE_GMLAN_CAN3 2U
-#define CAN_MODE_OBD_CAN2 3U
+#define CAN_MODE_OBD_CAN2 1U
+
+extern struct board board_black;
+extern struct board board_dos;
+extern struct board board_uno;
+extern struct board board_tres;
+extern struct board board_grey;
+extern struct board board_white;
+extern struct board board_cuatro;
+extern struct board board_red;

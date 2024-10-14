@@ -12,3 +12,4 @@ common_src = [
 parser = lenv.SharedLibrary('modelparser', common_src, LIBS=libs)
 
 lenv.Program('modelparsed', ["modelparsed.cc"]+common_src, LIBS=libs)
+lenv.SharedLibrary('libmodelparsed.so', ["modelparsed.cc"]+common_src, LIBS=libs)

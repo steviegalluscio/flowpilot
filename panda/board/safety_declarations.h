@@ -1,30 +1,43 @@
 #pragma once
 
-#define GET_BIT(msg, b) (((msg)->data[((b) / 8U)] >> ((b) % 8U)) & 0x1U)
+#include <stdint.h>
+#include <stdbool.h>
+
+#define GET_BIT(msg, b) ((bool)!!(((msg)->data[((b) / 8U)] >> ((b) % 8U)) & 0x1U))
 #define GET_BYTE(msg, b) ((msg)->data[(b)])
-#define GET_FLAG(value, mask) (((__typeof__(mask))(value) & (mask)) == (mask))
+#define GET_FLAG(value, mask) (((__typeof__(mask))(value) & (mask)) == (mask)) // cppcheck-suppress misra-c2012-1.2; allow __typeof__
 
-uint32_t GET_BYTES(const CANPacket_t *msg, int start, int len) {
-  uint32_t ret = 0U;
-  for (int i = 0; i < len; i++) {
-    const uint8_t shift = i * 8;
-    ret |= (((uint32_t)msg->data[start + i]) << shift);
-  }
-  return ret;
-}
+#define BUILD_SAFETY_CFG(rx, tx) ((safety_config){(rx), (sizeof((rx)) / sizeof((rx)[0])), \
+                                                  (tx), (sizeof((tx)) / sizeof((tx)[0]))})
+#define SET_RX_CHECKS(rx, config) \
+  do { \
+    (config).rx_checks = (rx); \
+    (config).rx_checks_len = sizeof((rx)) / sizeof((rx)[0]); \
+  } while (0);
 
-const int MAX_WRONG_COUNTERS = 5;
-const uint8_t MAX_MISSED_MSGS = 10U;
+#define SET_TX_MSGS(tx, config) \
+  do { \
+    (config).tx_msgs = (tx); \
+    (config).tx_msgs_len = sizeof((tx)) / sizeof((tx)[0]); \
+  } while(0);
+
+#define UPDATE_VEHICLE_SPEED(val_ms) (update_sample(&vehicle_speed, ROUND((val_ms) * VEHICLE_SPEED_FACTOR)))
+
+uint32_t GET_BYTES(const CANPacket_t *msg, int start, int len);
+
+extern const int MAX_WRONG_COUNTERS;
 #define MAX_ADDR_CHECK_MSGS 3U
+#define MAX_SAMPLE_VALS 6
 // used to represent floating point vehicle speed in a sample_t
 #define VEHICLE_SPEED_FACTOR 100.0
 
+
 // sample struct that keeps 6 samples in memory
 struct sample_t {
-  int values[6];
+  int values[MAX_SAMPLE_VALS];
   int min;
   int max;
-} sample_t_default = {.values = {0}, .min = 0, .max = 0};
+};
 
 // safety code requires floats
 struct lookup_t {
@@ -90,10 +103,10 @@ typedef struct {
   const int inactive_gas;
   const int max_brake;
 
-  // alternative cmd limits, ex: transmission rpm on subaru
-  const int max_alt;
-  const int min_alt;
-  const int inactive_alt;
+  // transmission rpm limits
+  const int max_transmission_rpm;
+  const int min_transmission_rpm;
+  const int inactive_transmission_rpm;
 
   // speed cmd limits
   const int inactive_speed;
@@ -106,14 +119,11 @@ typedef struct {
   const bool check_checksum;         // true is checksum check is performed
   const uint8_t max_counter;         // maximum value of the counter. 0 means that the counter check is skipped
   const bool quality_flag;           // true is quality flag check is performed
-  const uint32_t expected_timestep;  // expected time between message updates [us]
+  const uint32_t frequency;      // expected frequency of the message [Hz]
 } CanMsgCheck;
 
-// params and flags about checksum, counter and frequency checks for each monitored address
 typedef struct {
-  // const params
-  const CanMsgCheck msg[MAX_ADDR_CHECK_MSGS];  // check either messages (e.g. honda steer)
-  // dynamic flags
+  // dynamic flags, reset on safety mode init
   bool msg_seen;
   int index;                         // if multiple messages are allowed to be checked, this stores the index of the first one seen. only msg[msg_index] will be used
   bool valid_checksum;               // true if and only if checksum check is passed
@@ -122,109 +132,99 @@ typedef struct {
   uint8_t last_counter;              // last counter value
   uint32_t last_timestamp;           // micro-s
   bool lagging;                      // true if and only if the time between updates is excessive
-} AddrCheckStruct;
+} RxStatus;
+
+// params and flags about checksum, counter and frequency checks for each monitored address
+typedef struct {
+  const CanMsgCheck msg[MAX_ADDR_CHECK_MSGS];  // check either messages (e.g. honda steer)
+  RxStatus status;
+} RxCheck;
 
 typedef struct {
-  AddrCheckStruct *check;
-  int len;
-} addr_checks;
+  RxCheck *rx_checks;
+  int rx_checks_len;
+  const CanMsg *tx_msgs;
+  int tx_msgs_len;
+} safety_config;
 
-int safety_rx_hook(CANPacket_t *to_push);
-int safety_tx_hook(CANPacket_t *to_send);
-int safety_tx_lin_hook(int lin_num, uint8_t *data, int len);
-uint32_t get_ts_elapsed(uint32_t ts, uint32_t ts_last);
-int to_signed(int d, int bits);
-void update_sample(struct sample_t *sample, int sample_new);
-bool max_limit_check(int val, const int MAX, const int MIN);
-bool angle_dist_to_meas_check(int val, struct sample_t *val_meas,
-  const int MAX_ERROR, const int MAX_VAL);
-bool dist_to_meas_check(int val, int val_last, struct sample_t *val_meas,
-  const int MAX_RATE_UP, const int MAX_RATE_DOWN, const int MAX_ERROR);
-bool driver_limit_check(int val, int val_last, struct sample_t *val_driver,
-  const int MAX, const int MAX_RATE_UP, const int MAX_RATE_DOWN,
-  const int MAX_ALLOWANCE, const int DRIVER_FACTOR);
-bool get_longitudinal_allowed(void);
-bool rt_rate_limit_check(int val, int val_last, const int MAX_RT_DELTA);
-float interpolate(struct lookup_t xy, float x);
-int ROUND(float val);
-void gen_crc_lookup_table_8(uint8_t poly, uint8_t crc_lut[]);
-void gen_crc_lookup_table_16(uint16_t poly, uint16_t crc_lut[]);
-bool msg_allowed(CANPacket_t *to_send, const CanMsg msg_list[], int len);
-int get_addr_check_index(CANPacket_t *to_push, AddrCheckStruct addr_list[], const int len);
-void update_counter(AddrCheckStruct addr_list[], int index, uint8_t counter);
-void update_addr_timestamp(AddrCheckStruct addr_list[], int index);
-bool is_msg_valid(AddrCheckStruct addr_list[], int index);
-bool addr_safety_check(CANPacket_t *to_push,
-                       const addr_checks *rx_checks,
-                       uint32_t (*get_checksum)(CANPacket_t *to_push),
-                       uint32_t (*compute_checksum)(CANPacket_t *to_push),
-                       uint8_t (*get_counter)(CANPacket_t *to_push),
-                       bool (*get_quality_flag_valid)(CANPacket_t *to_push));
-void generic_rx_checks(bool stock_ecu_detected);
-void relay_malfunction_set(void);
-void relay_malfunction_reset(void);
-bool steer_torque_cmd_checks(int desired_torque, int steer_req, const SteeringLimits limits);
-bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const SteeringLimits limits);
-bool longitudinal_accel_checks(int desired_accel, const LongitudinalLimits limits);
-bool longitudinal_speed_checks(int desired_speed, const LongitudinalLimits limits);
-bool longitudinal_gas_checks(int desired_gas, const LongitudinalLimits limits);
-bool longitudinal_alt_checks(int desired_alt, const LongitudinalLimits limits);
-bool longitudinal_brake_checks(int desired_brake, const LongitudinalLimits limits);
-bool longitudinal_interceptor_checks(CANPacket_t *to_send);
-void pcm_cruise_check(bool cruise_engaged);
+typedef uint32_t (*get_checksum_t)(const CANPacket_t *to_push);
+typedef uint32_t (*compute_checksum_t)(const CANPacket_t *to_push);
+typedef uint8_t (*get_counter_t)(const CANPacket_t *to_push);
+typedef bool (*get_quality_flag_valid_t)(const CANPacket_t *to_push);
 
-typedef const addr_checks* (*safety_hook_init)(uint16_t param);
-typedef int (*rx_hook)(CANPacket_t *to_push);
-typedef int (*tx_hook)(CANPacket_t *to_send);
-typedef int (*tx_lin_hook)(int lin_num, uint8_t *data, int len);
+typedef safety_config (*safety_hook_init)(uint16_t param);
+typedef void (*rx_hook)(const CANPacket_t *to_push);
+typedef bool (*tx_hook)(const CANPacket_t *to_send);
 typedef int (*fwd_hook)(int bus_num, int addr);
 
 typedef struct {
   safety_hook_init init;
   rx_hook rx;
   tx_hook tx;
-  tx_lin_hook tx_lin;
   fwd_hook fwd;
+  get_checksum_t get_checksum;
+  compute_checksum_t compute_checksum;
+  get_counter_t get_counter;
+  get_quality_flag_valid_t get_quality_flag_valid;
 } safety_hooks;
 
-void safety_tick(const addr_checks *addr_checks);
+bool safety_rx_hook(const CANPacket_t *to_push);
+bool safety_tx_hook(CANPacket_t *to_send);
+uint32_t get_ts_elapsed(uint32_t ts, uint32_t ts_last);
+int to_signed(int d, int bits);
+void update_sample(struct sample_t *sample, int sample_new);
+bool get_longitudinal_allowed(void);
+int ROUND(float val);
+void gen_crc_lookup_table_8(uint8_t poly, uint8_t crc_lut[]);
+#ifdef CANFD
+void gen_crc_lookup_table_16(uint16_t poly, uint16_t crc_lut[]);
+#endif
+void generic_rx_checks(bool stock_ecu_detected);
+bool steer_torque_cmd_checks(int desired_torque, int steer_req, const SteeringLimits limits);
+bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const SteeringLimits limits);
+bool longitudinal_accel_checks(int desired_accel, const LongitudinalLimits limits);
+bool longitudinal_speed_checks(int desired_speed, const LongitudinalLimits limits);
+bool longitudinal_gas_checks(int desired_gas, const LongitudinalLimits limits);
+bool longitudinal_transmission_rpm_checks(int desired_transmission_rpm, const LongitudinalLimits limits);
+bool longitudinal_brake_checks(int desired_brake, const LongitudinalLimits limits);
+void pcm_cruise_check(bool cruise_engaged);
+
+void safety_tick(const safety_config *safety_config);
 
 // This can be set by the safety hooks
-bool controls_allowed = false;
-bool relay_malfunction = false;
-bool gas_interceptor_detected = false;
-int gas_interceptor_prev = 0;
-bool gas_pressed = false;
-bool gas_pressed_prev = false;
-bool brake_pressed = false;
-bool brake_pressed_prev = false;
-bool regen_braking = false;
-bool regen_braking_prev = false;
-bool cruise_engaged_prev = false;
-struct sample_t vehicle_speed;
-bool vehicle_moving = false;
-bool acc_main_on = false;  // referred to as "ACC off" in ISO 15622:2018
-int cruise_button_prev = 0;
-bool safety_rx_checks_invalid = false;
+extern bool controls_allowed;
+extern bool relay_malfunction;
+extern bool gas_pressed;
+extern bool gas_pressed_prev;
+extern bool brake_pressed;
+extern bool brake_pressed_prev;
+extern bool regen_braking;
+extern bool regen_braking_prev;
+extern bool cruise_engaged_prev;
+extern struct sample_t vehicle_speed;
+extern bool vehicle_moving;
+extern bool acc_main_on; // referred to as "ACC off" in ISO 15622:2018
+extern int cruise_button_prev;
+extern bool safety_rx_checks_invalid;
 
 // for safety modes with torque steering control
-int desired_torque_last = 0;       // last desired steer torque
-int rt_torque_last = 0;            // last desired torque for real time check
-int valid_steer_req_count = 0;     // counter for steer request bit matching non-zero torque
-int invalid_steer_req_count = 0;   // counter to allow multiple frames of mismatching torque request bit
-struct sample_t torque_meas;       // last 6 motor torques produced by the eps
-struct sample_t torque_driver;     // last 6 driver torques measured
-uint32_t ts_torque_check_last = 0;
-uint32_t ts_steer_req_mismatch_last = 0;  // last timestamp steer req was mismatched with torque
+extern int desired_torque_last;       // last desired steer torque
+extern int rt_torque_last;            // last desired torque for real time check
+extern int valid_steer_req_count;     // counter for steer request bit matching non-zero torque
+extern int invalid_steer_req_count;   // counter to allow multiple frames of mismatching torque request bit
+extern struct sample_t torque_meas;       // last 6 motor torques produced by the eps
+extern struct sample_t torque_driver;     // last 6 driver torques measured
+extern uint32_t ts_torque_check_last;
+extern uint32_t ts_steer_req_mismatch_last;  // last timestamp steer req was mismatched with torque
 
 // state for controls_allowed timeout logic
-bool heartbeat_engaged = false;             // openpilot enabled, passed in heartbeat USB command
-uint32_t heartbeat_engaged_mismatches = 0;  // count of mismatches between heartbeat_engaged and controls_allowed
+extern bool heartbeat_engaged;             // openpilot enabled, passed in heartbeat USB command
+extern uint32_t heartbeat_engaged_mismatches;  // count of mismatches between heartbeat_engaged and controls_allowed
 
 // for safety modes with angle steering control
-uint32_t ts_angle_last = 0;
-int desired_angle_last = 0;
-struct sample_t angle_meas;         // last 6 steer angles/curvatures
+extern uint32_t ts_angle_last;
+extern int desired_angle_last;
+extern struct sample_t angle_meas;         // last 6 steer angles/curvatures
 
 // This can be set with a USB command
 // It enables features that allow alternative experiences, like not disengaging on gas press
@@ -241,9 +241,43 @@ struct sample_t angle_meas;         // last 6 steer angles/curvatures
 // See ISO 15622:2018 for more information.
 #define ALT_EXP_RAISE_LONGITUDINAL_LIMITS_TO_ISO_MAX 8
 
-int alternative_experience = 0;
+// This flag allows AEB to be commanded from openpilot.
+#define ALT_EXP_ALLOW_AEB 16
+
+extern int alternative_experience;
 
 // time since safety mode has been changed
-uint32_t safety_mode_cnt = 0U;
-// allow 1s of transition timeout after relay changes state before assessing malfunctioning
-const uint32_t RELAY_TRNS_TIMEOUT = 1U;
+extern uint32_t safety_mode_cnt;
+
+typedef struct {
+  uint16_t id;
+  const safety_hooks *hooks;
+} safety_hook_config;
+
+extern uint16_t current_safety_mode;
+extern uint16_t current_safety_param;
+extern safety_config current_safety_config;
+
+int safety_fwd_hook(int bus_num, int addr);
+int set_safety_hooks(uint16_t mode, uint16_t param);
+
+extern const safety_hooks body_hooks;
+extern const safety_hooks chrysler_hooks;
+extern const safety_hooks elm327_hooks;
+extern const safety_hooks nooutput_hooks;
+extern const safety_hooks alloutput_hooks;
+extern const safety_hooks ford_hooks;
+extern const safety_hooks gm_hooks;
+extern const safety_hooks honda_nidec_hooks;
+extern const safety_hooks honda_bosch_hooks;
+extern const safety_hooks hyundai_canfd_hooks;
+extern const safety_hooks hyundai_hooks;
+extern const safety_hooks hyundai_legacy_hooks;
+extern const safety_hooks mazda_hooks;
+extern const safety_hooks nissan_hooks;
+extern const safety_hooks subaru_hooks;
+extern const safety_hooks subaru_preglobal_hooks;
+extern const safety_hooks tesla_hooks;
+extern const safety_hooks toyota_hooks;
+extern const safety_hooks volkswagen_mqb_hooks;
+extern const safety_hooks volkswagen_pq_hooks;

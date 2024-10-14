@@ -1,25 +1,13 @@
+#include "uart_declarations.h"
+
 // IRQs: USART2, USART3, UART5
 
 // ***************************** Definitions *****************************
-#define FIFO_SIZE_INT 0x400U
-
-typedef struct uart_ring {
-  volatile uint16_t w_ptr_tx;
-  volatile uint16_t r_ptr_tx;
-  uint8_t *elems_tx;
-  uint32_t tx_fifo_size;
-  volatile uint16_t w_ptr_rx;
-  volatile uint16_t r_ptr_rx;
-  uint8_t *elems_rx;
-  uint32_t rx_fifo_size;
-  USART_TypeDef *uart;
-  void (*callback)(struct uart_ring*);
-  bool overwrite;
-} uart_ring;
 
 #define UART_BUFFER(x, size_rx, size_tx, uart_ptr, callback_ptr, overwrite_mode) \
-  uint8_t elems_rx_##x[size_rx]; \
-  uint8_t elems_tx_##x[size_tx]; \
+  static uint8_t elems_rx_##x[size_rx]; \
+  static uint8_t elems_tx_##x[size_tx]; \
+  extern uart_ring uart_ring_##x; \
   uart_ring uart_ring_##x = {  \
     .w_ptr_tx = 0, \
     .r_ptr_tx = 0, \
@@ -34,17 +22,7 @@ typedef struct uart_ring {
     .overwrite = (overwrite_mode) \
   };
 
-// ***************************** Function prototypes *****************************
-void debug_ring_callback(uart_ring *ring);
-void uart_tx_ring(uart_ring *q);
-void uart_send_break(uart_ring *u);
-
 // ******************************** UART buffers ********************************
-
-// lin1, K-LINE = UART5
-// lin2, L-LINE = USART3
-UART_BUFFER(lin1, FIFO_SIZE_INT, FIFO_SIZE_INT, UART5, NULL, false)
-UART_BUFFER(lin2, FIFO_SIZE_INT, FIFO_SIZE_INT, USART3, NULL, false)
 
 // debug = USART2
 UART_BUFFER(debug, FIFO_SIZE_INT, FIFO_SIZE_INT, USART2, debug_ring_callback, true)
@@ -63,12 +41,6 @@ uart_ring *get_ring_by_number(int a) {
     case 0:
       ring = &uart_ring_debug;
       break;
-    case 2:
-      ring = &uart_ring_lin1;
-      break;
-    case 3:
-      ring = &uart_ring_lin2;
-      break;
     case 4:
       ring = &uart_ring_som_debug;
       break;
@@ -80,7 +52,7 @@ uart_ring *get_ring_by_number(int a) {
 }
 
 // ************************* Low-level buffer functions *************************
-bool getc(uart_ring *q, char *elem) {
+bool get_char(uart_ring *q, char *elem) {
   bool ret = false;
 
   ENTER_CRITICAL();
@@ -116,7 +88,7 @@ bool injectc(uart_ring *q, char elem) {
   return ret;
 }
 
-bool putc(uart_ring *q, char elem) {
+bool put_char(uart_ring *q, char elem) {
   bool ret = false;
   uint16_t next_w_ptr;
 
@@ -138,21 +110,6 @@ bool putc(uart_ring *q, char elem) {
   uart_tx_ring(q);
 
   return ret;
-}
-
-// Seems dangerous to use (might lock CPU if called with interrupts disabled f.e.)
-// TODO: Remove? Not used anyways
-void uart_flush(uart_ring *q) {
-  while (q->w_ptr_tx != q->r_ptr_tx) {
-    __WFI();
-  }
-}
-
-void uart_flush_sync(uart_ring *q) {
-  // empty the TX buffer
-  while (q->w_ptr_tx != q->r_ptr_tx) {
-    uart_tx_ring(q);
-  }
 }
 
 void clear_uart_buff(uart_ring *q) {
@@ -177,20 +134,6 @@ void print(const char *a) {
   }
 }
 
-void putui(uint32_t i) {
-  uint32_t i_copy = i;
-  char str[11];
-  uint8_t idx = 10;
-  str[idx] = '\0';
-  idx--;
-  do {
-    str[idx] = (i_copy % 10U) + 0x30U;
-    idx--;
-    i_copy /= 10;
-  } while (i_copy != 0U);
-  print(&str[idx + 1U]);
-}
-
 void puthx(uint32_t i, uint8_t len) {
   const char c[] = "0123456789abcdef";
   for (int pos = ((int)len * 4) - 4; pos > -4; pos -= 4) {
@@ -206,10 +149,13 @@ void puth2(unsigned int i) {
   puthx(i, 2U);
 }
 
+#if defined(ENABLE_SPI) || defined(BOOTSTUB) || defined(DEBUG)
 void puth4(unsigned int i) {
   puthx(i, 4U);
 }
+#endif
 
+#if defined(ENABLE_SPI) || defined(BOOTSTUB) || defined(DEBUG_USB) || defined(DEBUG_COMMS)
 void hexdump(const void *a, int l) {
   if (a != NULL) {
     for (int i=0; i < l; i++) {
@@ -220,3 +166,4 @@ void hexdump(const void *a, int l) {
   }
   print("\n");
 }
+#endif

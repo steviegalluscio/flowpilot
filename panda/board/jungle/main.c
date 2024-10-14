@@ -2,7 +2,6 @@
 #include "board/config.h"
 
 #include "board/safety.h"
-#include "board/drivers/gmlan_alt.h"
 
 #include "board/drivers/pwm.h"
 #include "board/drivers/usb.h"
@@ -31,7 +30,7 @@
 
 void debug_ring_callback(uart_ring *ring) {
   char rcv;
-  while (getc(ring, &rcv)) {
+  while (get_char(ring, &rcv)) {
     (void)injectc(ring, rcv);
   }
 }
@@ -53,6 +52,14 @@ uint32_t loop_counter = 0U;
 uint16_t button_press_cnt = 0U;
 void tick_handler(void) {
   if (TICK_TIMER->SR != 0) {
+    if (generated_can_traffic) {
+      for (int i = 0; i < 3; i++) {
+        if (can_health[i].transmit_error_cnt >= 128) {
+          (void)llcan_init(CANIF_FROM_CAN_NUM(i));
+        }
+      }
+    }
+
     // tick drivers at 8Hz
     usb_tick();
 
@@ -141,18 +148,18 @@ int main(void) {
   clock_init();
   peripherals_init();
   detect_board_type();
+  // red+green leds enabled until succesful USB init, as a debug indicator
+  current_board->set_led(LED_RED, true);
+  current_board->set_led(LED_GREEN, true);
 
   // print hello
   print("\n\n\n************************ MAIN START ************************\n");
 
   // check for non-supported board types
-  if (hw_type == HW_TYPE_UNKNOWN) {
-    print("Unsupported board type\n");
-    while (1) { /* hang */ }
-  }
+  assert_fatal(hw_type != HW_TYPE_UNKNOWN, "Unsupported board type\n");
 
   print("Config:\n");
-  print("  Board type: "); print(current_board->board_type); print("\n");
+  print("  Board type: 0x"); puth(hw_type); print("\n");
 
   // init board
   current_board->init();
@@ -172,6 +179,9 @@ int main(void) {
   // enable USB (right before interrupts or enum can fail!)
   usb_init();
 
+  current_board->set_led(LED_RED, false);
+  current_board->set_led(LED_GREEN, false);
+
   print("**** INTERRUPTS ON ****\n");
   enable_interrupts();
 
@@ -188,8 +198,32 @@ int main(void) {
 #endif
 
   // LED should keep on blinking all the time
-  uint64_t cnt = 0;
+  uint32_t cnt = 0;
   for (cnt=0;;cnt++) {
+    if (generated_can_traffic) {
+      // fill up all the queues
+      can_ring *qs[] = {&can_tx1_q, &can_tx2_q, &can_tx3_q};
+      for (int j = 0; j < 3; j++) {
+        for (uint16_t n = 0U; n < can_slots_empty(qs[j]); n++) {
+          uint16_t i = cnt % 100U;
+          CANPacket_t to_send;
+          to_send.returned = 0U;
+          to_send.rejected = 0U;
+          to_send.extended = 0U;
+          to_send.addr = 0x200U + i;
+          to_send.bus = i % 3U;
+          to_send.data_len_code = i % 8U;
+          (void)memcpy(to_send.data, "\xff\xff\xff\xff\xff\xff\xff\xff", dlc_to_len[to_send.data_len_code]);
+          can_set_checksum(&to_send);
+
+          can_send(&to_send, to_send.bus, true);
+        }
+      }
+
+      delay(1000);
+      continue;
+    }
+
     // useful for debugging, fade breaks = panda is overloaded
     for (uint32_t fade = 0U; fade < MAX_LED_FADE; fade += 1U) {
       current_board->set_led(LED_RED, true);
