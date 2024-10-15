@@ -50,6 +50,7 @@ import java.util.*;
 
 import ai.flow.android.sensor.PandaManager;
 import ai.flow.android.sensor.OnroadManager;
+import ai.flow.android.sensor.ModelparsedManager;
 
 import ai.flow.python.ServiceFlowreset;
 import ai.flow.python.ServiceKeyvald;
@@ -120,15 +121,14 @@ public class AndroidLauncher extends FragmentActivity implements AndroidFragment
 	@SuppressLint("HardwareIds")
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		System.out.println("Inside launcher");
 		super.onCreate(savedInstanceState);
 		appContext = getApplicationContext();
 
-		System.out.println("launch 2");
-
+		// Hack to clean out Params
 		ServiceFlowreset.prepare(getApplication().getApplicationContext());
 		ServiceFlowreset.start(getApplication().getApplicationContext(), "");
 
+		// These can run all the time
 		ServiceKeyvald.prepare(getApplication().getApplicationContext());
 		ServiceKeyvald.start(getApplication().getApplicationContext(), "");
 		ServiceLogmessaged.prepare(getApplication().getApplicationContext());
@@ -136,23 +136,19 @@ public class AndroidLauncher extends FragmentActivity implements AndroidFragment
 		ServiceThermald.prepare(getApplication().getApplicationContext());
 		ServiceThermald.start(getApplication().getApplicationContext(), "");
 
-		ServiceControlsd.prepare(getApplication().getApplicationContext());
-		ServiceControlsd.start(getApplication().getApplicationContext(), "");
-
 		ServiceDebugd.prepare(getApplication().getApplicationContext());
 		ServiceDebugd.start(getApplication().getApplicationContext(), "");
 
-		// Prepare only!
+		// These will spinloop until CarParams become available, for startup performance
+		ServiceControlsd.prepare(getApplication().getApplicationContext());
+		ServiceControlsd.start(getApplication().getApplicationContext(), "");
 		ServiceRadard.prepare(getApplication().getApplicationContext());
+		ServiceRadard.start(getApplication().getApplicationContext(), "");
 		ServiceCalibrationd.prepare(getApplication().getApplicationContext());
+		ServiceCalibrationd.start(getApplication().getApplicationContext(), "");
 		ServicePlannerd.prepare(getApplication().getApplicationContext());
+		ServicePlannerd.start(getApplication().getApplicationContext(), "");
 
-		// ServiceModelparsed.start(getApplication().getApplicationContext());
-		// ServiceRadard.start(getApplication().getApplicationContext(), "");
-		// ServiceCalibrationd.start(getApplication().getApplicationContext(), "");
-		// ServicePlannerd.start(getApplication().getApplicationContext(), "");
-		
-		System.out.println("launch 3");
 
 		// set environment variables from intent extras.
 		Bundle bundle = getIntent().getExtras();
@@ -172,7 +168,6 @@ public class AndroidLauncher extends FragmentActivity implements AndroidFragment
 		} catch (ErrnoException e) {
 			throw new RuntimeException(e);
 		}
-		System.out.println("launch 4");
 
 		Window activity = getWindow();
 		HardwareManager androidHardwareManager = new AndroidHardwareManager(activity);
@@ -180,23 +175,19 @@ public class AndroidLauncher extends FragmentActivity implements AndroidFragment
 		activity.setSustainedPerformanceMode(true);
 		activity.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-		System.out.println("launch 4.1");
 
 		params = ParamsInterface.getInstance();
-		System.out.println("launch 4.2");
 
 		TelephonyManager telephonyManager = (TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE);
 		String dongleID = "";
 		if (telephonyManager != null) {
 			dongleID = Settings.Secure.getString(appContext.getContentResolver(), Settings.Secure.ANDROID_ID);
 		}
-		System.out.println("launch 4.3");
 
 		// populate device specific info.
 		params.put("DongleId", dongleID);
 		params.put("DeviceManufacturer", Build.MANUFACTURER);
 		params.put("DeviceModel", Build.MODEL);
-		System.out.println("launch 5");
 
 		// get camera intrinsics from file if they exist
 		LoadIntrinsicsFromFile();
@@ -208,9 +199,11 @@ public class AndroidLauncher extends FragmentActivity implements AndroidFragment
 		CameraManager finalCameraManager = cameraManager; // stupid java
 		PandaManager pandaManager = new PandaManager(getApplication().getApplicationContext());
 		OnroadManager onroadManager = new OnroadManager(getApplication().getApplicationContext());
+		ModelparsedManager modelparsedManager = new ModelparsedManager(getApplication().getApplicationContext());
 		managers = new HashMap<String, SensorInterface>() {{
 			put("panda", pandaManager);
 			put("onroad", onroadManager);
+			put("modelparsed", modelparsedManager);
 		}};
 		sensors = new HashMap<String, SensorInterface>() {{
 			put("roadCamera", finalCameraManager);
@@ -218,7 +211,6 @@ public class AndroidLauncher extends FragmentActivity implements AndroidFragment
 			put("motionSensors", sensorManager);
 		}};
 
-		System.out.println("launch 6");
 
 		int pid = Process.myPid();
 
@@ -253,17 +245,14 @@ public class AndroidLauncher extends FragmentActivity implements AndroidFragment
 				startService(intent);*/
 				break;
 		}
-		System.out.println("launch 7");
 
 		ModelExecutor modelExecutor;
 		if (utils.Runner == utils.USE_MODEL_RUNNER.EXTERNAL_TINYGRAD)
 			modelExecutor = new ModelExecutorExternal();
 		else
 			modelExecutor = utils.F2 ? new ModelExecutorF2(model) : new ModelExecutorF3(model);
-		System.out.println("EXECUTOR IS A " + modelExecutor.getClass().getName());
 		Launcher launcher = new Launcher(sensors, modelExecutor, managers);
 
-		System.out.println("launch 8");
 
 		ErrorReporter ACRAreporter = ACRA.getErrorReporter();
 		ACRAreporter.putCustomData("DongleId", dongleID);
@@ -275,7 +264,6 @@ public class AndroidLauncher extends FragmentActivity implements AndroidFragment
 		ACRAreporter.putCustomData("GitBranch", params.getString("GitBranch"));
 		ACRAreporter.putCustomData("GitRemote", params.getString("GitRemote"));
 
-		System.out.println("launch 9");
 
 		MainFragment fragment = new MainFragment(new FlowUI(launcher, androidHardwareManager, pid));
 		cameraManager.setLifeCycleFragment(fragment);

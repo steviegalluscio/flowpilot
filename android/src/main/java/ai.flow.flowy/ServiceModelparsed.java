@@ -48,9 +48,15 @@ public class ServiceModelparsed extends Service implements Runnable {
 
     @Override
     public void run(){
-        nativeInit();
+        nativeStart();
+    }
+
+    @Override
+    public void onDestroy() {
+        nativeStop();
     }
 
     // Native part
-    public static native void nativeInit();
+    public static native void nativeStart();
+    public static native void nativeStop();
 }

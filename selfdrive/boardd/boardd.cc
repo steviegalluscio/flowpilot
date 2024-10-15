@@ -684,7 +684,15 @@ void boardd_main_thread(std::vector<std::string> serials) {
   }
 }
 
+void boardd_main_exit() {
+  do_exit = true;
+}
+
 void boardd_main_thread(const int fd) {
+  ignition = false;
+  pigeon_active = false;
+  do_exit = false;
+
   PubMaster pm({"pandaStates", "peripheralState"});
   LOGW("attempting to connect");
 

@@ -190,11 +190,8 @@ public class ModelExecutorF3 extends ModelExecutor {
     }
 
     public void init(){
-        System.out.println("ModelExecutorF3 1");
         if (initialized) return;
-        System.out.println("ModelExecutorF3 2");
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-        System.out.println("ModelExecutorF3 3");
 
         if (utils.Runner == utils.USE_MODEL_RUNNER.SNPE) {
             imgTensorShape = new int[]{1, 128, 256, 12};
@@ -219,12 +216,8 @@ public class ModelExecutorF3 extends ModelExecutor {
         navfeaturesNDArr = Nd4j.zeros(navFeaturesTensorShape);
         navinstructNDArr = Nd4j.zeros(navInstructionsTensorShape);
 
-        System.out.println("ModelExecutorF3 4");
-
         ph.createPublishers(Arrays.asList("modelRaw"));
         sh.createSubscribers(Arrays.asList("pulseDesire", "liveCalibration", "lateralPlan"));
-
-        System.out.println("ModelExecutorF3 5");
 
         inputShapeMap.put("input_imgs", imgTensorShape);
         inputShapeMap.put("big_input_imgs", imgTensorShape);
@@ -244,16 +237,12 @@ public class ModelExecutorF3 extends ModelExecutor {
         inputMap.put("traffic_convention", trafficNDArr);
         outputMap.put("outputs", netOutputs);
 
-        System.out.println("ModelExecutorF3 6");
         modelRunner.init(inputShapeMap, outputShapeMap);
-        System.out.println("ModelExecutorF3 7");
         modelRunner.warmup();
 
-        System.out.println("ModelExecutorF3 8");
         wrapMatrix = Preprocess.getWrapMatrix(rpy_calib, Camera.cam_intrinsics, Camera.cam_intrinsics, true, false);
         wrapMatrixWide = Preprocess.getWrapMatrix(rpy_calib, Camera.cam_intrinsics, Camera.cam_intrinsics, true, true);
 
-        System.out.println("ModelExecutorF3 9");
         // wait for a frame
         while (msgFrameBuffer == null) {
             try {
@@ -261,7 +250,6 @@ public class ModelExecutorF3 extends ModelExecutor {
             } catch (Exception e) {}
         }
 
-        System.out.println("ModelExecutorF3 10");
         // TODO:Clean this shit.
         boolean rgb;
         if (getUseGPU()){
@@ -284,7 +272,6 @@ public class ModelExecutorF3 extends ModelExecutor {
                     msgFrameWideBuffer.getYPixelStride(), msgFrameWideBuffer.getUvWidth(), msgFrameWideBuffer.getUvHeight(), msgFrameWideBuffer.getUvPixelStride(),
                     msgFrameWideBuffer.getUOffset(), msgFrameWideBuffer.getVOffset(), msgFrameWideBuffer.getStride());
         }
-        System.out.println("ModelExecutorF3 11");
 
         initialized = true;
         params.putBool("ModelDReady", true);

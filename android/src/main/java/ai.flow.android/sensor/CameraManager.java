@@ -24,6 +24,7 @@ import android.hardware.camera2.params.TonemapCurve;
 import android.os.Build;
 import android.util.Range;
 import android.util.Size;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.OptIn;
@@ -57,6 +58,12 @@ import java.util.concurrent.ThreadPoolExecutor;
 
 import static ai.flow.android.sensor.Utils.fillYUVBuffer;
 import static ai.flow.common.transformations.Camera.CAMERA_TYPE_ROAD;
+
+import androidx.camera.camera2.Camera2Config;
+import androidx.camera.core.CameraProvider;
+import androidx.camera.core.CameraXConfig;
+
+
 
 public class CameraManager extends SensorInterface {
 
@@ -124,11 +131,16 @@ public class CameraManager extends SensorInterface {
         this.lifeCycleFragment = lifeCycleFragment;
     }
 
+    private CameraXConfig getCameraXConfig() {
+        return CameraXConfig.Builder.fromConfig(Camera2Config.defaultConfig())
+                .setMinimumLoggingLevel(Log.INFO)
+                .build();
+    }
+
     public void start() {
         if (running)
             return;
         running = true;
-        System.out.println("Camera loop 1");
 
         CameraManager myCamManager = this;
         ListenableFuture<ProcessCameraProvider> cameraProviderFuture = ProcessCameraProvider.getInstance(context);
@@ -136,9 +148,8 @@ public class CameraManager extends SensorInterface {
             @Override
             public void run() {
                 try {
-                    System.out.println("Camera loop 2");
                     cameraProvider = cameraProviderFuture.get();
-                    System.out.println("Camera loop 3");
+                    cameraProvider.configureInstance(getCameraXConfig());
                     myAnalyzer = new ImageAnalysis.Analyzer() {
                         @SuppressLint("RestrictedApi")
                         @ExperimentalCamera2Interop @OptIn(markerClass = ExperimentalGetImage.class) @RequiresApi(api = Build.VERSION_CODES.N)
@@ -227,7 +238,6 @@ public class CameraManager extends SensorInterface {
                 }
             }
         }, ContextCompat.getMainExecutor(context));
-        System.out.println("Camera loop out");
     }
 
 
@@ -266,7 +276,6 @@ public class CameraManager extends SensorInterface {
 
     @SuppressLint({"RestrictedApi", "UnsafeOptInUsageError"})
     private void bindUseCases(@NonNull ProcessCameraProvider cameraProvider) {
-        System.out.println("Bind use in");
         ImageAnalysis.Builder builder = new ImageAnalysis.Builder();
         builder.setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST);
         Size ims = new Size(W, H);
@@ -308,7 +317,6 @@ public class CameraManager extends SensorInterface {
         cameraControl.setZoomRatio(Camera.digital_zoom_apply);
         c2control = Camera2CameraControl.from(cameraControl);
         c2info = Camera2CameraInfo.from(camera.getCameraInfo());
-        System.out.println("Bind use out");
     }
 
     public boolean isRunning() {

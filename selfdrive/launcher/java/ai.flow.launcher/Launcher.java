@@ -34,10 +34,8 @@ public class Launcher {
 
     public void startSensorD() {
         for (String sensorName : sensors.keySet()) {
-            System.out.println("startSensorD " + sensorName);
             if (!sensors.get(sensorName).isRunning())
                 sensors.get(sensorName).start();
-            System.out.println("startSensorD ret");
         }
     }
 
@@ -50,13 +48,10 @@ public class Launcher {
     }
 
     public void startAllD() {
-        System.out.println("startAllD 1");
         startSensorD();
-        System.out.println("startAllD 2");
         initModelD();
-        System.out.println("startAllD 3");
         this.managers.get("panda").start();
-        System.out.println("startAllD 4");
+        this.managers.get("modelparsed").start();
     }
 
     public void main(String[] args) {

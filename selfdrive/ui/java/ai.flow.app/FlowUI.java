@@ -67,11 +67,14 @@ public class FlowUI extends Game {
                     }
                     if (prevIsOnRoad != isOnRoad) {
                         if (!isOnRoad) {
+                            // launcher.managers.get("modelparsed").stop();
                             modelExecutor.stop();
+                            launcher.managers.get("onroad").stop();
                         } else {
                             launcher.managers.get("onroad").start();
                             OnRoadScreen.HideInfoTable = true;
                             modelExecutor.start();
+                            // launcher.managers.get("modelparsed").start();
                         }
                     }
                     prevIsOnRoad = isOnRoad;

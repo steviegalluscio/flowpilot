@@ -10,6 +10,7 @@
 #include <errno.h>
 #include <netinet/tcp.h>
 
+#include "common/swaglog.h"
 #include "cereal/messaging/messaging.h"
 #include "selfdrive/modeld/models/driving.h"
 #include "common/util.h"
@@ -102,8 +103,9 @@ ExitHandler do_exit;
 float model_raw_preds[NET_OUTPUT_SIZE];
 
 void modelparsed_main() {
-
+  LOGW("Starting Modelparsed");
   PubMaster pm({"modelV2", "cameraOdometry"});
+  LOGW("Made PubMaster");
 
 #ifdef USE_SOCKETS
   int server_socket = -1;
@@ -165,6 +167,7 @@ void modelparsed_main() {
 #endif
 
   }
+  LOGW("Exiting modelparsed!");
 }
 
 int main(int argc, char **argv) {
@@ -173,7 +176,12 @@ int main(int argc, char **argv) {
 }
 
 extern "C" {
-JNIEXPORT void Java_ai_flow_flowy_ServiceModelparsed_nativeInit(JNIEnv* env, jclass cls, jint fd) {
+JNIEXPORT void Java_ai_flow_flowy_ServiceModelparsed_nativeStart(JNIEnv* env, jclass cls) {
+  do_exit = false;
   modelparsed_main();
+}
+
+JNIEXPORT void Java_ai_flow_flowy_ServiceModelparsed_nativeStop(JNIEnv* env, jclass cls) {
+  do_exit = true;
 }
 }

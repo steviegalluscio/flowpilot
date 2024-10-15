@@ -1,7 +1,7 @@
-Import('env', 'messaging')
+Import('env', 'messaging', 'common')
 lenv = env.Clone()
 
-libs = ['capnp', 'zmq', 'kj', messaging]
+libs = ['capnp', 'zmq', 'kj', messaging, common]
 
 common_src = [
   "models/commonmodel.cc",

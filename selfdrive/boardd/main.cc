@@ -35,7 +35,11 @@ int main(int argc, char *argv[]) {
 }
 
 extern "C" {
-JNIEXPORT void Java_ai_flow_flowy_ServicePandad_nativeInit(JNIEnv* env, jclass cls, jint fd) {
+JNIEXPORT void Java_ai_flow_flowy_ServicePandad_nativeStart(JNIEnv* env, jclass cls, jint fd) {
   boardd_main_thread(fd);
+}
+
+JNIEXPORT void Java_ai_flow_flowy_ServicePandad_nativeStop(JNIEnv* env, jclass cls) {
+  boardd_main_exit();
 }
 }
