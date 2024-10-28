@@ -167,11 +167,11 @@
       "background": "default-select",
       "scrollStyle": "list",
       "listStyle": {
-        "font": "default-font",
+        "font": "default-font-30",
         "selection": "padded-list-selection",
         "background": "select-box-list-bg"
       },
-      "font": "default-font",
+      "font": "default-font-30",
       "fontColor": "white",
       "disabledFontColor": "grey"
     }

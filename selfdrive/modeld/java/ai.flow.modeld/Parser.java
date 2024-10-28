@@ -42,7 +42,7 @@ public class Parser {
         net_outputs.put("lead", new float[SIZE_ModelOutputLeads]);
         net_outputs.put("meta", new float[SIZE_ModelOutputMeta]);
         net_outputs.put("pose", new float[SIZE_ModelOutputPose]);
-        net_outputs.put("stopLines", new float[SIZE_ModelOutputStopLines]);
+//        net_outputs.put("stopLines", new float[SIZE_ModelOutputStopLines]);
         net_outputs.put("state", new float[TEMPORAL_SIZE]);
     }
 
@@ -340,7 +340,7 @@ public class Parser {
         copyOfRange(outs, net_outputs.get("pose"), POSE_IDX, POSE_IDX + SIZE_ModelOutputPose);
 
         getBestPlan(outs, best_plan, PLAN_IDX);
-        fill_stopline(outs);
+//        fill_stopline(outs);
 
         plan_t_arr[0] = 0.0f;
         for (int xidx=1, tidx=0; xidx<TRAJECTORY_SIZE; xidx++) {

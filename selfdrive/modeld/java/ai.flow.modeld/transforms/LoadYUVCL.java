@@ -9,6 +9,8 @@ import static ai.flow.common.utils.readFile;
 import static ai.flow.modeld.CommonModelF3.*;
 import static org.jocl.CL.*;
 
+import com.badlogic.gdx.Gdx;
+
 public class LoadYUVCL {
     private cl_context context;
     private cl_command_queue commandQueue;
@@ -29,7 +31,7 @@ public class LoadYUVCL {
         this.context = context;
         this.commandQueue = commandQueue;
 
-        String programSource = readFile(Path.internal("selfdrive/assets/clkernels/loadyuv.cl"));
+        String programSource = Gdx.files.internal("clkernels/loadyuv.cl").readString();
         program = clCreateProgramWithSource(context,
                 1, new String[]{ programSource }, null, null);
 

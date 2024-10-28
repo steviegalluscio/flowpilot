@@ -135,13 +135,12 @@ std::string readFileIntoString(const char *filepath) {
     return buffer.str();
 }
 
-void Thneed::load(const char *filename) {
+void Thneed::load(byte* buf) {
     printf("Thneed::load: loading from %s\n", filename);
 
-    string buf = readFileIntoString(filename);
-    int jsz = *(int *)buf.data();
+    int jsz = *(int *)buf;
     string jsonerr;
-    string jj(buf.data() + sizeof(int), jsz);
+    string jj(buf + sizeof(int), jsz);
     json11::Json jdat = json11::Json::parse(jj, jsonerr);
 
     map<cl_mem, cl_mem> real_mem;

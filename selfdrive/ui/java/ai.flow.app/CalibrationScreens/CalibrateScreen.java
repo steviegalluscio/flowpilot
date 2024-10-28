@@ -1,7 +1,8 @@
 package ai.flow.app.CalibrationScreens;
 
 import ai.flow.app.FlowUI;
-import ai.flow.app.SetUpScreen;
+import ai.flow.app.OnRoadScreen;
+
 import ai.flow.calibration.CameraCalibratorIntrinsic;
 import ai.flow.common.ParamsInterface;
 import ai.flow.common.transformations.Camera;
@@ -22,7 +23,10 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.FillViewport;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
+
+import ai.flow.modeld.ModelExecutor;
 import messaging.ZMQSubHandler;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -90,7 +94,7 @@ public class CalibrateScreen extends ScreenAdapter {
 
         pixelMap.setBlending(Blending.None);
         calibrator = new CameraCalibratorIntrinsic(9, 6); // 6 by 9 chessboard :))
-        stageUI = new Stage(new StretchViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
+        stageUI = new Stage(new ScreenViewport());
 
         btnBack = new TextButton("Cancel", appContext.skin);
         btnBack.addListener(new ClickListener() {
@@ -138,15 +142,10 @@ public class CalibrateScreen extends ScreenAdapter {
     }
 
     public void updateCamera(){
-        // handles receiving, rendering and converting to rgb of images.
-        if (cameraType == Camera.CAMERA_TYPE_ROAD){
-            msgFrameBuffer = sh.recv(frameBufferTopic).getRoadCameraBuffer();
-            msgFrameData = sh.recv(frameDataTopic).getRoadCameraState();
-        }
-        else{
-            msgFrameBuffer = sh.recv(frameBufferTopic).getWideRoadCameraBuffer();
-            msgFrameData = sh.recv(frameDataTopic).getWideRoadCameraState();
-        }
+
+
+        msgFrameBuffer = ModelExecutor.msgFrameWideBuffer; // sh.recv(cameraBufferTopic).getWideRoadCameraBuffer();
+        msgFrameData = ModelExecutor.frameWideData; // sh.recv(cameraTopic).getWideRoadCameraState();
         currFrameID = msgFrameData.getFrameId();
         imgBuffer = updateImageBuffer(msgFrameBuffer, imgBuffer);
 
@@ -172,9 +171,9 @@ public class CalibrateScreen extends ScreenAdapter {
         Gdx.gl.glClearColor(0f, 0f, 0f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        if (sh.updated(frameBufferTopic)) {
-            updateCamera();
-        }
+//        if (sh.updated(frameBufferTopic)) {
+        updateCamera();
+//        }
 
         // images are processed in background to prevent annoying lag in UI camera stream.
         if (currFrameID % 20 == 0 && currFrameID != prevFrameID && executor.getActiveCount() < executor.getCorePoolSize() && !executor.isShutdown()) {
@@ -212,7 +211,7 @@ public class CalibrateScreen extends ScreenAdapter {
             }
             else
                 System.err.println("[WARN]: Camera not calibrated.");  // TODO display in GUI.
-            appContext.setScreen(new SetUpScreen(appContext));
+            appContext.setScreen(new OnRoadScreen(appContext));
             return;
         }
 

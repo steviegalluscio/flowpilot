@@ -37,7 +37,7 @@ switch(arch) {
 		javacpp_platform_suffix += '-x86_64'
 		break
 	case 'aarch64':
-		javacpp_platform_suffix += '-arm64'
+		javacpp_platform_suffix += ''
 		break
 	default:
 		project.logger.lifecycle("[WARNING]: $arch is not a supported platform for flow-pilot, \
@@ -52,7 +52,7 @@ if (project.hasProperty("androidSlim")) {
 }
 
 project.ext.set("javacpp_platform_suffix", javacpp_platform_suffix)
-project.ext.set("nd4j_version", '1.0.0-M1.1')
+project.ext.set("nd4j_version", '1.0.0-M2.1')
 project.ext.set("javacpp_version", '1.5.7')
 project.ext.set("openblas_version", '0.3.19')
 

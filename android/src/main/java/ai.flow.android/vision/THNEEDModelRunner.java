@@ -2,6 +2,8 @@ package ai.flow.android.vision;
 
 import android.app.Application;
 
+import com.badlogic.gdx.Gdx;
+
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 
@@ -21,7 +23,7 @@ public class THNEEDModelRunner extends ModelRunner {
     // native function
     public static native void createStdString(String javaString);
     public static native void getArray(int size);
-    public static native void initThneed();
+    public static native void initThneed(byte[] modelData);
     public static native float[] executeModel(float[] input);
     public float[] inputBuffer;
 
@@ -37,9 +39,11 @@ public class THNEEDModelRunner extends ModelRunner {
     public void init(Map<String, int[]> shapes, Map<String, int[]> outputShapes) {
         System.loadLibrary("jniconvert");
 
-        createStdString(modelPath);
+//        createStdString(modelPath);
         getArray(CommonModelF3.NET_OUTPUT_SIZE);
-        initThneed();
+
+        byte[] modelData = Gdx.files.internal("models/f3/supercombo.thneed").readBytes();
+        initThneed(modelData);
         inputBuffer = new float[2 * (1572864 / 4) + (3200 / 4) + 2];
         // new LA model input
         inputBuffer[img_len * 2 + desire_len + 1] = 0.1f; // steering actuator delay

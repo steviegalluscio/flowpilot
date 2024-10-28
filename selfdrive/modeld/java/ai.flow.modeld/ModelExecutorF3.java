@@ -5,6 +5,7 @@ import ai.flow.common.transformations.Camera;
 import ai.flow.common.utils;
 import ai.flow.definitions.Definitions;
 import ai.flow.modeld.messages.MsgModelRaw;
+import ai.flow.modeld.messages.MsgModelDataV2;
 import messaging.ZMQPubHandler;
 import messaging.ZMQSubHandler;
 import org.capnproto.PrimitiveList;
@@ -70,6 +71,7 @@ public class ModelExecutorF3 extends ModelExecutor {
     public final ZMQPubHandler ph = new ZMQPubHandler();
     public final ZMQSubHandler sh = new ZMQSubHandler(true);
     public MsgModelRaw msgModelRaw = new MsgModelRaw(CommonModelF3.NET_OUTPUT_SIZE);
+    public MsgModelDataV2 msgModelDataV2 = new MsgModelDataV2();
     public Definitions.LiveCalibrationData.Reader liveCalib;
 
     public long start, end;
@@ -174,8 +176,11 @@ public class ModelExecutorF3 extends ModelExecutor {
 
         // publish outputs
         end = System.currentTimeMillis();
-        msgModelRaw.fill(netOutputs, processStartTimestamp, lastFrameID, 0, 0f, end - start);
-        ph.publishBuffer("modelRaw", msgModelRaw.serialize(true));
+
+        Parser parser = new Parser();
+        ParsedOutputs parsedOutputs = parser.parser(netOutputs);
+        msgModelDataV2.fill(parsedOutputs, processStartTimestamp, lastFrameID, 0, 0f, end-start, end-start);
+        ph.publishBuffer("modelV2", msgModelDataV2.serialize(true));
 
         // compute runtime stats every 10 runs
         timePerIt += end - processStartTimestamp;
@@ -216,7 +221,7 @@ public class ModelExecutorF3 extends ModelExecutor {
         navfeaturesNDArr = Nd4j.zeros(navFeaturesTensorShape);
         navinstructNDArr = Nd4j.zeros(navInstructionsTensorShape);
 
-        ph.createPublishers(Arrays.asList("modelRaw"));
+        ph.createPublishers(Arrays.asList("modelV2"));
         sh.createSubscribers(Arrays.asList("pulseDesire", "liveCalibration", "lateralPlan"));
 
         inputShapeMap.put("input_imgs", imgTensorShape);

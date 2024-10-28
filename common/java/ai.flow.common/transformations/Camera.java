@@ -22,7 +22,7 @@ public class Camera {
     // everything autocalculated below
     public static float actual_cam_focal_length = (FocalX + FocalY) * 0.5f;
     public static float digital_zoom_apply = actual_cam_focal_length / (utils.F2 ? Model.MEDMODEL_F2_FL : Model.MEDMODEL_FL);
-    public static final int[] frameSize = new int[]{1920, 1080};
+    public static final int[] frameSize = new int[]{1280, 720};
     public static float OffsetX = CenterX - (frameSize[0]*0.5f);
     public static float OffsetY = CenterY - (frameSize[1]*0.5f);
 
@@ -41,6 +41,7 @@ public class Camera {
             {0.0f,  CameraIntrinsics[4],  CameraIntrinsics[5]},
             {0.0f,  0.0f,  1.0f}
     });
+
     public static final INDArray view_from_device = Nd4j.createFromArray(new float[][]{
             {0.0f,  1.0f,  0.0f},
             {0.0f,  0.0f,  1.0f},

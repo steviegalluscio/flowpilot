@@ -190,13 +190,12 @@ std::string readFileIntoString(const char *filepath) {
     return buffer.str();
 }
 
-void Thneed::load(const char *filename) {
-    __android_log_print(ANDROID_LOG_INFO, "JNILOG","Thneed::load: loading from %s\n", filename);
+void Thneed::load(byte* buf) {
+    __android_log_print(ANDROID_LOG_INFO, "JNILOG","Thneed::load: loading from byte array\n");
 
-    string buf = readFileIntoString(filename);
-    int jsz = *(int *)buf.data();
+    int jsz = *(int *)buf;
     string jsonerr;
-    string jj(buf.data() + sizeof(int), jsz);
+    string jj((char *)buf + sizeof(int), jsz);
     json11::Json jdat = json11::Json::parse(jj, jsonerr);
 
     map<cl_mem, cl_mem> real_mem;
@@ -771,9 +770,9 @@ void CLQueuedKernel::debug_print(bool verbose) {
 
 #endif // USE_PRECOMPILED
 
-ThneedModel::ThneedModel(const std::string path, float *_output, size_t _output_size, int runtime, bool luse_tf8, cl_context context) {
+ThneedModel::ThneedModel(byte* model, float *_output, size_t _output_size, int runtime, bool luse_tf8, cl_context context) {
     thneed = new Thneed(true, context);
-    thneed->load(path.c_str());
+    thneed->load(model);
     thneed->clexec();
 
     recorded = false;
@@ -863,8 +862,11 @@ extern "C" {
             prev_curvs_buf[i] = 0;
     }
 
-    void JNICALL Java_ai_flow_android_vision_THNEEDModelRunner_initThneed(JNIEnv *env, jobject obj) {
-        thneed = new ThneedModel(*pathString, outputs, output_len, 0, false, NULL);
+    void JNICALL Java_ai_flow_android_vision_THNEEDModelRunner_initThneed(JNIEnv *env, jobject obj, jbyteArray modelData) {
+//        byte * modelDataBytes = (byte *)env->GetDirectBufferAddress(modelData);
+        jbyte * modelDataBytes = env->GetByteArrayElements(modelData, 0);
+        thneed = new ThneedModel((byte*)modelDataBytes, outputs, output_len, 0, false, NULL);
+        env->ReleaseByteArrayElements(modelData, modelDataBytes, JNI_ABORT);
     }
 
     JNIEXPORT jfloatArray JNICALL Java_ai_flow_android_vision_THNEEDModelRunner_executeModel(JNIEnv *env, jobject obj,

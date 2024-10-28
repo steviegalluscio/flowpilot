@@ -1,8 +1,17 @@
 package ai.flow.android;
 
-import ai.flow.android.vision.THNEEDModelRunner;
-import ai.flow.app.R;
+import ai.flow.R;
 import ai.flow.common.ParamsInterface;
+import ai.flow.python.ServiceCalibrationd;
+import ai.flow.python.ServiceControlsd;
+import ai.flow.python.ServiceDebugd;
+import ai.flow.python.ServiceFlowreset;
+import ai.flow.python.ServiceKeyvald;
+import ai.flow.python.ServiceLogmessaged;
+import ai.flow.python.ServicePlannerd;
+import ai.flow.python.ServiceRadard;
+import ai.flow.python.ServiceThermald;
+
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -20,7 +29,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import com.bumptech.glide.Glide;
-import com.termux.shared.termux.TermuxConstants;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -94,13 +102,35 @@ public class LoadingActivity extends AppCompatActivity {
                     i++;
                 }
 
-                // boot all the flowpilot daemons in non-java land.
-                // bootTermux();
+                // Hack to clean out Params
+                ServiceFlowreset.prepare(getApplication().getApplicationContext());
+                ServiceFlowreset.start(getApplication().getApplicationContext(), "");
 
-                System.out.println("Attempting to call ParamsInterface");
-                ParamsInterface params = ParamsInterface.getInstance();
-                System.out.println("I got out!");
+                // These can run all the time
+                ServiceKeyvald.prepare(getApplication().getApplicationContext());
+                ServiceKeyvald.start(getApplication().getApplicationContext(), "");
+                ServiceLogmessaged.prepare(getApplication().getApplicationContext());
+                ServiceLogmessaged.start(getApplication().getApplicationContext(), "");
+                ServiceThermald.prepare(getApplication().getApplicationContext());
+                ServiceThermald.start(getApplication().getApplicationContext(), "");
 
+                ServiceDebugd.prepare(getApplication().getApplicationContext());
+                ServiceDebugd.start(getApplication().getApplicationContext(), "");
+
+                // These will spinloop until CarParams become available, for startup performance
+                ServiceControlsd.prepare(getApplication().getApplicationContext());
+                ServiceControlsd.start(getApplication().getApplicationContext(), "");
+                ServiceRadard.prepare(getApplication().getApplicationContext());
+                ServiceRadard.start(getApplication().getApplicationContext(), "");
+                ServiceCalibrationd.prepare(getApplication().getApplicationContext());
+                ServiceCalibrationd.start(getApplication().getApplicationContext(), "");
+                ServicePlannerd.prepare(getApplication().getApplicationContext());
+                ServicePlannerd.start(getApplication().getApplicationContext(), "");
+
+                try {
+                    ParamsInterface params = ParamsInterface.getInstance();
+                    params.blockTillExists("F3");
+                } catch (InterruptedException ignored) {}
                 bootComplete = true;
 
                 Intent intent = new Intent(getApplicationContext(), AndroidLauncher.class);
@@ -110,19 +140,6 @@ public class LoadingActivity extends AppCompatActivity {
                 finish();
             }
         }).start();
-    }
-
-    public void bootTermux(){
-        Intent intent = new Intent();
-        intent.setClassName(TermuxConstants.TERMUX_PACKAGE_NAME, TermuxConstants.TERMUX_APP.RUN_COMMAND_SERVICE_NAME);
-        intent.setAction(TermuxConstants.TERMUX_APP.RUN_COMMAND_SERVICE.ACTION_RUN_COMMAND);
-        intent.putExtra(TermuxConstants.TERMUX_APP.RUN_COMMAND_SERVICE.EXTRA_COMMAND_PATH, "/data/data/com.termux/files/usr/bin/bash");
-        intent.putExtra(TermuxConstants.TERMUX_APP.RUN_COMMAND_SERVICE.EXTRA_ARGUMENTS, new String[]{"boot_flowpilot"});
-        intent.putExtra(TermuxConstants.TERMUX_APP.RUN_COMMAND_SERVICE.EXTRA_WORKDIR, "/data/data/com.termux/files/home");
-        intent.putExtra(TermuxConstants.TERMUX_APP.RUN_COMMAND_SERVICE.EXTRA_BACKGROUND, true);
-        intent.putExtra(TermuxConstants.TERMUX_APP.RUN_COMMAND_SERVICE.EXTRA_SESSION_ACTION, "0");
-        intent.putExtra(TermuxConstants.TERMUX_APP.RUN_COMMAND_SERVICE.EXTRA_COMMAND_LABEL, "boot flowpilot");
-        startService(intent);
     }
 
     private void requestPermissions() {

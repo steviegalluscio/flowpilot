@@ -10,6 +10,8 @@ import static ai.flow.common.utils.readFile;
 import static ai.flow.modeld.CommonModelF3.*;
 import static org.jocl.CL.*;
 
+import com.badlogic.gdx.Gdx;
+
 public class TransformCL {
     private cl_context context;
     private cl_command_queue commandQueue;
@@ -50,7 +52,7 @@ public class TransformCL {
         in_v_offset[0] = v_offset;
         in_stride[0] = stride;
 
-        String programSource = readFile(Path.internal("selfdrive/assets/clkernels/transform.cl"));
+        String programSource = Gdx.files.internal("clkernels/transform.cl").readString();
         program = clCreateProgramWithSource(context,
                 1, new String[]{ programSource }, null, null);
 

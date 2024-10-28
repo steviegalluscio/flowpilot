@@ -303,8 +303,8 @@ public class CameraManager extends SensorInterface {
         CameraRequests.setCaptureRequestOption(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON);
         CameraRequests.setCaptureRequestOption(CaptureRequest.COLOR_CORRECTION_MODE, CaptureRequest.COLOR_CORRECTION_MODE_FAST);
         CameraRequests.setCaptureRequestOption(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, new Range<>(20, 20));
-        CameraRequests.setCaptureRequestOption(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_OFF);
-        CameraRequests.setCaptureRequestOption(CaptureRequest.LENS_FOCUS_DISTANCE, 0f);
+//        CameraRequests.setCaptureRequestOption(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_OFF);
+//        CameraRequests.setCaptureRequestOption(CaptureRequest.LENS_FOCUS_DISTANCE, 0f);
         ImageAnalysis imageAnalysis = builder.build();
         imageAnalysis.setAnalyzer(ContextCompat.getMainExecutor(context), myAnalyzer);
 

@@ -22,7 +22,7 @@ public class OnroadManager extends SensorInterface {
 
     public void start() {
         System.out.println("Onroad was called, starting services!");
-        ServiceModelparsed.start(this.ctx);
+//        ServiceModelparsed.start(this.ctx);
     }
 
     public void stop() {

@@ -8,6 +8,8 @@ import java.nio.ByteBuffer;
 import static ai.flow.common.utils.readFile;
 import static org.jocl.CL.*;
 
+import com.badlogic.gdx.Gdx;
+
 public class RGB2YUV {
     private cl_context context;
     private cl_command_queue commandQueue;
@@ -28,7 +30,7 @@ public class RGB2YUV {
         if (context == null || commandQueue == null)
             initCL();
 
-        String programSource = readFile(Path.internal("selfdrive/assets/clkernels/rgb_to_nv12.cl"));
+        String programSource = Gdx.files.internal("clkernels/rgb_to_nv12.cl").readString();
         program = clCreateProgramWithSource(this.context,
                 1, new String[]{ programSource }, null, null);
 

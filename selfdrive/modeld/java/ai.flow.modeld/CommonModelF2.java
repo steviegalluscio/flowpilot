@@ -20,13 +20,13 @@ public class CommonModelF2 {
     public static final int SIZE_ModelOutputLaneLines = 2144 / 4;
     public static final int SIZE_ModelOutputRoadEdges = 1056 / 4;
     public static final int SIZE_ModelOutputLeads = 420 / 4;
-    public static final int SIZE_ModelOutputStopLines = 208 / 4;
+//    public static final int SIZE_ModelOutputStopLines = 208 / 4;
     public static final int SIZE_ModelOutputMeta = 352 / 4;
     public static final int SIZE_ModelOutputPose = 48 / 4;
     public static final int SIZE_ModelOutputLinesXY = 1056 / 4;
     public static final int SIZE_ModelOutputStopLinePrediction = 68 / 4;
     public static final int SIZE_Total = SIZE_ModelOutputPlans + SIZE_ModelOutputLaneLines + SIZE_ModelOutputRoadEdges +
-                                         SIZE_ModelOutputLeads + SIZE_ModelOutputStopLines + SIZE_ModelOutputMeta +
+                                         SIZE_ModelOutputLeads + SIZE_ModelOutputMeta +
                                          SIZE_ModelOutputPose;
     public static final int SIZE_ModelOutputLeadPrediction = 204 / 4;
     public static final int DESIRE_LEN = 8;
@@ -58,7 +58,7 @@ public class CommonModelF2 {
     public static final int LEAD_IDX = RE_IDX + SIZE_ModelOutputRoadEdges;
     public static final int LEAD_PROB_IDX = LEAD_IDX + LEAD_MHP_N * SIZE_ModelOutputLeadPrediction;
     public static final int STOP_SIGN_IDX = LEAD_IDX + SIZE_ModelOutputLeads;
-    public static final int META_IDX = STOP_SIGN_IDX + SIZE_ModelOutputStopLines;
+    public static final int META_IDX = STOP_SIGN_IDX;
     public static final int POSE_IDX = META_IDX + SIZE_ModelOutputMeta;
     public static final int OUTPUT_SIZE =  POSE_IDX + SIZE_ModelOutputPose;
     public static final int TEMPORAL_SIZE = 512;

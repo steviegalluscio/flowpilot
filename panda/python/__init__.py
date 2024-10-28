@@ -225,7 +225,7 @@ class Panda:
   FLAG_FORD_LONG_CONTROL = 1
   FLAG_FORD_CANFD = 2
 
-  def __init__(self, serial: str | None = None, claim: bool = True, disable_checks: bool = True, can_speed_kbps: int = 500, cli: bool = True):
+  def __init__(self, serial: str | None = None, claim: bool = True, disable_checks: bool = True, can_speed_kbps: int = 500, cli: bool = True, fd: int | None = None, bootstub: bool = False):
     self._disable_checks = disable_checks
 
     self._handle: BaseHandle
@@ -239,7 +239,7 @@ class Panda:
         self._connect_serial = serial
 
     # connect and set mcu type
-    self.connect(claim)
+    self.connect(claim, fd=fd, bootstub=bootstub)
 
   def _cli_select_panda(self):
     dfu_pandas = PandaDFU.list()
@@ -278,13 +278,16 @@ class Panda:
       if self._context is not None:
         self._context.close()
 
-  def connect(self, claim=True, wait=False):
+  def connect(self, claim=True, wait=False, fd=None, bootstub=False):
     self.close()
 
     self._handle = None
     while self._handle is None:
       # try USB first, then SPI
-      self._context, self._handle, serial, self.bootstub, bcd = self.usb_connect(self._connect_serial, claim=claim, no_error=wait)
+      if fd is not None:
+        self._context, self._handle, serial, self.bootstub, bcd = self.usb_connect_fd(fd, bootstub)
+      else:
+        self._context, self._handle, serial, self.bootstub, bcd = self.usb_connect(self._connect_serial, claim=claim, no_error=wait)
       if self._handle is None:
         self._context, self._handle, serial, self.bootstub, bcd = self.spi_connect(self._connect_serial)
       if not wait:
@@ -376,7 +379,19 @@ class Panda:
     return None, handle, spi_serial, bootstub, None
 
   @classmethod
-  def usb_connect(cls, serial, claim=True, no_error=False):
+  def usb_connect_fd(cls, fd, bootstub=False):
+    context = usb1.USBContext()
+    context.open()
+    try:
+      usb_handle = context.wrapSysDevice(fd)
+    except Exception:
+       logger.exception("USB connect error")
+    usb_serial = '1234'
+    bcd = False
+    return context, usb_handle, usb_serial, bootstub, bcd
+
+  @classmethod
+  def usb_connect(cls, serial, claim=True, no_error=False, fd=None):
     handle, usb_serial, bootstub, bcd = None, None, None, None
     context = usb1.USBContext()
     context.open()

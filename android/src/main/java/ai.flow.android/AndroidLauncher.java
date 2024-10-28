@@ -52,18 +52,7 @@ import ai.flow.android.sensor.PandaManager;
 import ai.flow.android.sensor.OnroadManager;
 import ai.flow.android.sensor.ModelparsedManager;
 
-import ai.flow.python.ServiceFlowreset;
-import ai.flow.python.ServiceKeyvald;
-import ai.flow.python.ServiceLogmessaged;
-import ai.flow.python.ServiceThermald;
-import ai.flow.python.ServiceDebugd;
 
-import ai.flow.python.ServiceCalibrationd;
-import ai.flow.python.ServiceControlsd;
-import ai.flow.python.ServicePlannerd;
-import ai.flow.python.ServiceRadard;
-
-import ai.flow.flowy.ServiceModelparsed;
 
 
 /** Launches the main android flowpilot application. */
@@ -73,82 +62,11 @@ public class AndroidLauncher extends FragmentActivity implements AndroidFragment
 	public static Context appContext;
 	public static ParamsInterface params;
 
-	public void LoadIntrinsicsFromFile() {
-		File file = new File(Path.getFlowPilotRoot(), utils.F2 ? "camerainfo.medium.txt" : "camerainfo.big.txt");
-		if (file.exists() == false) return;
-		try {
-			BufferedReader br = new BufferedReader(new FileReader(file));
-			String line;
-
-			float[] numbers = new float[5];
-			int i = 0;
-
-			while ((line = br.readLine()) != null && i < 5) {
-				numbers[i] = Float.parseFloat(line);
-				i++;
-			}
-			br.close();
-
-			Camera.FocalX = numbers[0];
-			Camera.FocalY = numbers[1];
-			Camera.CenterX = numbers[2];
-			Camera.CenterY = numbers[3];
-			Camera.UseCameraID = (int)numbers[4];
-
-			// recalculate values using loaded new stuff
-			Camera.actual_cam_focal_length = (Camera.FocalX + Camera.FocalY) * 0.5f;
-			Camera.digital_zoom_apply = Camera.actual_cam_focal_length / (utils.F2 ? Model.MEDMODEL_F2_FL : Model.MEDMODEL_FL);
-			Camera.OffsetX = Camera.CenterX - (Camera.frameSize[0]*0.5f);
-			Camera.OffsetY = Camera.CenterY - (Camera.frameSize[1]*0.5f);
-
-			Camera.CameraIntrinsics = new float[] {
-					Camera.FocalX, 0.0f, Camera.frameSize[0] * 0.5f + Camera.OffsetX * Camera.digital_zoom_apply,
-					0.0f, Camera.FocalY, Camera.frameSize[1] * 0.5f + Camera.OffsetY * Camera.digital_zoom_apply,
-					0.0f,   0.0f, 1.0f
-			};
-
-			Camera.cam_intrinsics = Nd4j.createFromArray(new float[][]{
-					{ Camera.CameraIntrinsics[0],  0.0f,  Camera.CameraIntrinsics[2]},
-					{0.0f,  Camera.CameraIntrinsics[4],  Camera.CameraIntrinsics[5]},
-					{0.0f,  0.0f,  1.0f}
-			});
-
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
 	@SuppressLint("HardwareIds")
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		appContext = getApplicationContext();
-
-		// Hack to clean out Params
-		ServiceFlowreset.prepare(getApplication().getApplicationContext());
-		ServiceFlowreset.start(getApplication().getApplicationContext(), "");
-
-		// These can run all the time
-		ServiceKeyvald.prepare(getApplication().getApplicationContext());
-		ServiceKeyvald.start(getApplication().getApplicationContext(), "");
-		ServiceLogmessaged.prepare(getApplication().getApplicationContext());
-		ServiceLogmessaged.start(getApplication().getApplicationContext(), "");
-		ServiceThermald.prepare(getApplication().getApplicationContext());
-		ServiceThermald.start(getApplication().getApplicationContext(), "");
-
-		ServiceDebugd.prepare(getApplication().getApplicationContext());
-		ServiceDebugd.start(getApplication().getApplicationContext(), "");
-
-		// These will spinloop until CarParams become available, for startup performance
-		ServiceControlsd.prepare(getApplication().getApplicationContext());
-		ServiceControlsd.start(getApplication().getApplicationContext(), "");
-		ServiceRadard.prepare(getApplication().getApplicationContext());
-		ServiceRadard.start(getApplication().getApplicationContext(), "");
-		ServiceCalibrationd.prepare(getApplication().getApplicationContext());
-		ServiceCalibrationd.start(getApplication().getApplicationContext(), "");
-		ServicePlannerd.prepare(getApplication().getApplicationContext());
-		ServicePlannerd.start(getApplication().getApplicationContext(), "");
-
 
 		// set environment variables from intent extras.
 		Bundle bundle = getIntent().getExtras();
@@ -189,12 +107,9 @@ public class AndroidLauncher extends FragmentActivity implements AndroidFragment
 		params.put("DeviceManufacturer", Build.MANUFACTURER);
 		params.put("DeviceModel", Build.MODEL);
 
-		// get camera intrinsics from file if they exist
-		LoadIntrinsicsFromFile();
-
 		AndroidApplicationConfiguration configuration = new AndroidApplicationConfiguration();
 		CameraManager cameraManager, cameraManagerWide = null;
-		SensorManager sensorManager = new SensorManager(appContext, 100);
+		SensorManager sensorManager = new SensorManager(appContext, 20);
 		cameraManager = new CameraManager(getApplication().getApplicationContext(), utils.F2 || Camera.FORCE_TELE_CAM_F3 ? Camera.CAMERA_TYPE_ROAD : Camera.CAMERA_TYPE_WIDE);
 		CameraManager finalCameraManager = cameraManager; // stupid java
 		PandaManager pandaManager = new PandaManager(getApplication().getApplicationContext());
@@ -256,7 +171,7 @@ public class AndroidLauncher extends FragmentActivity implements AndroidFragment
 
 		ErrorReporter ACRAreporter = ACRA.getErrorReporter();
 		ACRAreporter.putCustomData("DongleId", dongleID);
-		ACRAreporter.putCustomData("AndroidAppVersion", ai.flow.app.BuildConfig.VERSION_NAME);
+//		ACRAreporter.putCustomData("AndroidAppVersion", ai.flow.app.BuildConfig.VERSION_NAME);
 		ACRAreporter.putCustomData("FlowpilotVersion", params.getString("Version"));
 		ACRAreporter.putCustomData("VersionMisMatch", checkVersionMisMatch().toString());
 
@@ -293,10 +208,10 @@ public class AndroidLauncher extends FragmentActivity implements AndroidFragment
 
 	private Boolean checkVersionMisMatch() {
 		// check version mismatch between android app and github repo project.
-		if (!params.getString("Version").equals(ai.flow.app.BuildConfig.VERSION_NAME)) {
-			Toast.makeText(appContext, "WARNING: App version mismatch detected. Make sure you are using compatible versions of apk and github repo.", Toast.LENGTH_LONG).show();
-			return true;
-		}
+//		if (!params.getString("Version").equals(ai.flow.app.BuildConfig.VERSION_NAME)) {
+//			Toast.makeText(appContext, "WARNING: App version mismatch detected. Make sure you are using compatible versions of apk and github repo.", Toast.LENGTH_LONG).show();
+//			return true;
+//		}
 		return false;
 	}
 

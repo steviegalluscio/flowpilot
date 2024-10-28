@@ -20,6 +20,8 @@ import org.nd4j.linalg.factory.Nd4j;
 import org.opencv.core.Core;
 
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 
 public class FlowUI extends Game {
@@ -59,7 +61,8 @@ public class FlowUI extends Game {
             @Override
             public void run() {
                 while (!Thread.interrupted()){
-                    isOnRoad = params.existsAndCompare("IsOnroad", true);
+//                    isOnRoad = params.existsAndCompare("IsOnroad", true);
+                    isOnRoad = true;
                     try {
                         Thread.sleep(50);
                     } catch (InterruptedException e) {
@@ -67,14 +70,12 @@ public class FlowUI extends Game {
                     }
                     if (prevIsOnRoad != isOnRoad) {
                         if (!isOnRoad) {
-                            // launcher.managers.get("modelparsed").stop();
                             modelExecutor.stop();
                             launcher.managers.get("onroad").stop();
                         } else {
                             launcher.managers.get("onroad").start();
                             OnRoadScreen.HideInfoTable = true;
                             modelExecutor.start();
-                            // launcher.managers.get("modelparsed").start();
                         }
                     }
                     prevIsOnRoad = isOnRoad;
@@ -84,7 +85,7 @@ public class FlowUI extends Game {
     }
 
     public static void loadFont(String fontPath, String fontName, int size, Skin skin){
-        FreeTypeFontGenerator fontGen = new FreeTypeFontGenerator(Gdx.files.absolute(Path.internal(fontPath)));
+        FreeTypeFontGenerator fontGen = new FreeTypeFontGenerator(Gdx.files.internal(fontPath));
         FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
         parameter.genMipMaps = true;
         parameter.magFilter = Texture.TextureFilter.MipMapLinearLinear;
@@ -96,25 +97,26 @@ public class FlowUI extends Game {
     }
 
     public void loadInternalFonts(Skin skin){
-        loadFont("selfdrive/assets/fonts/Inter-Regular.ttf", "default-font-16", 16, skin);
-        loadFont("selfdrive/assets/fonts/Inter-Regular.ttf", "default-font-20", 20, skin);
-        loadFont("selfdrive/assets/fonts/Inter-Regular.ttf", "default-font-25", 25, skin);
-        loadFont("selfdrive/assets/fonts/Inter-Regular.ttf", "default-font-30", 30, skin);
-        loadFont("selfdrive/assets/fonts/Inter-Regular.ttf", "default-font", 36, skin);
-        loadFont("selfdrive/assets/fonts/Inter-Regular.ttf", "default-font-64", 64, skin);
-        loadFont("selfdrive/assets/fonts/opensans_bold.ttf", "default-font-bold", 20, skin);
-        loadFont("selfdrive/assets/fonts/opensans_bold.ttf", "default-font-bold-med", 45, skin);
-        loadFont("selfdrive/assets/fonts/opensans_bold.ttf", "default-font-bold-large", 100, skin);
+        float widthScale = Gdx.app.getGraphics().getWidth()/1200.f;
+        loadFont("fonts/Inter-Regular.ttf", "default-font-16", Math.round(16*widthScale), skin);
+        loadFont("fonts/Inter-Regular.ttf", "default-font-20", Math.round(20*widthScale), skin);
+        loadFont("fonts/Inter-Regular.ttf", "default-font-25", Math.round(25*widthScale), skin);
+        loadFont("fonts/Inter-Regular.ttf", "default-font-30", Math.round(30*widthScale), skin);
+        loadFont("fonts/Inter-Regular.ttf", "default-font", Math.round(36*widthScale), skin);
+        loadFont("fonts/Inter-Regular.ttf", "default-font-64", Math.round(64*widthScale), skin);
+        loadFont("fonts/opensans_bold.ttf", "default-font-bold", Math.round(20*widthScale), skin);
+        loadFont("fonts/opensans_bold.ttf", "default-font-bold-med", Math.round(45*widthScale), skin);
+        loadFont("fonts/opensans_bold.ttf", "default-font-bold-large", Math.round(100*widthScale), skin);
     }
 
     public void loadSounds() {
-        engageSound = Gdx.audio.newSound(Gdx.files.absolute(Path.internal("selfdrive/assets/sounds/engage.wav")));
-        disengageSound = Gdx.audio.newSound(Gdx.files.absolute(Path.internal("selfdrive/assets/sounds/disengage.wav")));
-        promptSound = Gdx.audio.newSound(Gdx.files.absolute(Path.internal("selfdrive/assets/sounds/prompt.wav")));
-        promptDistractedSound = Gdx.audio.newSound(Gdx.files.absolute(Path.internal("selfdrive/assets/sounds/prompt_distracted.wav")));
-        refuseSound = Gdx.audio.newSound(Gdx.files.absolute(Path.internal("selfdrive/assets/sounds/refuse.wav")));
-        warningImmediate = Gdx.audio.newSound(Gdx.files.absolute(Path.internal("selfdrive/assets/sounds/warning_immediate.wav")));
-        warningSoft = Gdx.audio.newSound(Gdx.files.absolute(Path.internal("selfdrive/assets/sounds/warning_soft.wav")));
+        engageSound = Gdx.audio.newSound(Gdx.files.internal("sounds/engage.wav"));
+        disengageSound = Gdx.audio.newSound(Gdx.files.internal("sounds/disengage.wav"));
+        promptSound = Gdx.audio.newSound(Gdx.files.internal("sounds/prompt.wav"));
+        promptDistractedSound = Gdx.audio.newSound(Gdx.files.internal("sounds/prompt_distracted.wav"));
+        refuseSound = Gdx.audio.newSound(Gdx.files.internal("sounds/refuse.wav"));
+        warningImmediate = Gdx.audio.newSound(Gdx.files.internal("sounds/warning_immediate.wav"));
+        warningSoft = Gdx.audio.newSound(Gdx.files.internal("sounds/warning_soft.wav"));
     }
 
     public static TextButton getPaddedButton(String text, Skin skin, String styleName, int padding){
@@ -141,25 +143,24 @@ public class FlowUI extends Game {
             font = new BitmapFont();
             font.setColor(0f, 1f, 0f, 1f);
             font.getData().setScale(5);
-            skin = new Skin(new TextureAtlas(Gdx.files.absolute(Path.internal("selfdrive/assets/skins/uiskin.atlas"))));
+            skin = new Skin(new TextureAtlas(Gdx.files.internal("skins/uiskin.atlas")));
             for (Texture texture: skin.getAtlas().getTextures())
                 texture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
             loadInternalFonts(skin);
             loadSounds();
-            skin.load(Gdx.files.absolute(Path.internal("selfdrive/assets/skins/uiskin.json")));
+            skin.load(Gdx.files.internal("skins/uiskin.json"));
 
-            System.out.println("FlowUi create 2");
             settingsScreen = new SettingsScreen(this);
             onRoadScreen = new OnRoadScreen(this);
 
-            setScreen(new SetUpScreen(this));
+            this.launcher.startSensorD();
+            this.launcher.startAllD();
+            setScreen(onRoadScreen);
         }
         else{
-            System.out.println("FlowUi create 3");
             launcher.startSensorD();
             launcher.startAllD();
         }
-        System.out.println("FlowUi create 4");
     }
 
     @Override

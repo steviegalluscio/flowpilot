@@ -17,7 +17,7 @@ public class Utils {
     }
 
     public static Texture loadTextureMipMap(String path){
-        Texture texture = new Texture(Gdx.files.absolute(Path.internal(path)), true);
+        Texture texture = new Texture(Gdx.files.internal(path), true);
         texture.setFilter(Texture.TextureFilter.MipMapLinearNearest, Texture.TextureFilter.Linear);
         return texture;
     }

@@ -16,6 +16,8 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
+
 import ai.flow.app.CalibrationScreens.CalibrationInfo;
 import ai.flow.common.ParamsInterface;
 import ai.flow.common.SystemUtils;
@@ -31,6 +33,10 @@ public class SettingsScreen extends ScreenAdapter {
     FlowUI appContext;
     ParamsInterface params = ParamsInterface.getInstance();
     Stage stage;
+    float uiWidth = Gdx.app.getGraphics().getWidth(); //1280
+    float uiHeight = Gdx.app.getGraphics().getHeight(); //640
+    float widthScale = uiWidth / 1280;
+    float heightScale = uiHeight / 640;
     TextButton buttonDevice, buttonCalibrate, buttonWideCalibrate, buttonCalibrateExtrinsic,
             buttonTraining, buttonPowerOff, buttonReboot, buttonSoftware,
             buttonUninstall, buttonToggle, buttonCheckUpdate, buttonLogOut,
@@ -39,28 +45,29 @@ public class SettingsScreen extends ScreenAdapter {
     SelectBox<String> carBrandSelectBox;
     SpriteBatch batch;
     Table rootTable, settingTable, scrollTable, currentSettingTable;
-    Texture lineTex = Utils.getLineTexture(700, 1, Color.WHITE);
+
+    Texture lineTex = Utils.getLineTexture(Math.round(700*widthScale), Math.round(1*heightScale), Color.WHITE);
     ScrollPane scrollPane;
     Dialog dialog;
     public java.util.List<String> AdditionalToggles = new java.util.ArrayList<>();
     public java.util.List<TextButton> ToggleButtons = new ArrayList<>();
 
     public void addKeyValueTable(Table table, String key, String value, boolean addLine) {
-        table.add(new Label(key, appContext.skin, "default-font", "white")).left().pad(30);
-        table.add(new Label(value, appContext.skin, "default-font", "white")).right().pad(30);
+        table.add(new Label(key, appContext.skin, "default-font", "white")).left();//.pad(30 * heightScale);
+        table.add(new Label(value, appContext.skin, "default-font", "white")).right();//.pad(30 * heightScale);
         if (addLine) {
             table.row();
-            table.add(new Image(lineTex)).colspan(2).pad(10, 0, 10, 0).height(1);
+            table.add(new Image(lineTex)).colspan(2).pad(10*heightScale, 0, 10*heightScale, 0).height(1*heightScale);
             table.row();
         }
     }
 
     public void addKeyValueTable(Table table, String key, Button value, boolean addLine) {
-        table.add(new Label(key, appContext.skin, "default-font", "white")).left().pad(30);
-        table.add(value).right().pad(30);
+        table.add(new Label(key, appContext.skin, "default-font", "white")).left();//.pad(30 * heightScale);
+        table.add(value).right();//.pad(30 * heightScale);
         if (addLine) {
             table.row();
-            table.add(new Image(lineTex)).colspan(2).pad(10, 0, 10, 0).height(1);
+            table.add(new Image(lineTex)).colspan(2).pad(10*heightScale, 0, 10*heightScale, 0).height(1*heightScale);
             table.row();
         }
         else
@@ -68,24 +75,23 @@ public class SettingsScreen extends ScreenAdapter {
     }
 
     public void addKeyValueTable(Table table, String key, SelectBox<String> value, boolean addLine) {
-        table.add(new Label(key, appContext.skin, "default-font", "white")).left().pad(30);
-        table.add(value).right().pad(30);
-        table.row();
+        table.add(new Label(key, appContext.skin, "default-font", "white")).top().left().pad(30 * heightScale);
+        table.add(value).right().pad(30 * heightScale);
     }
 
     public void fillDeviceSettings(){
         currentSettingTable.clear();
         String dongleID = params.exists("DongleId") ? params.getString("DongleId") : "N/A";
-        addKeyValueTable(currentSettingTable, "Dongle ID", dongleID, true);
+//        addKeyValueTable(currentSettingTable, "Dongle ID", dongleID, true);
         String deviceManufacturer = params.exists("DeviceManufacturer") ? params.getString("DeviceManufacturer") : "";
         addKeyValueTable(currentSettingTable, "Device Manufacturer", deviceManufacturer, true);
         String deviceModel = params.exists("DeviceModel") ? params.getString("DeviceModel") : "";
         addKeyValueTable(currentSettingTable, "Device Name", deviceModel, true);
-        addKeyValueTable(currentSettingTable, "Log Out", buttonLogOut, true);
+        addKeyValueTable(currentSettingTable, "Log Out", buttonCalibrate, true);
         addKeyValueTable(currentSettingTable, "Reset Extrinsic Calibration", buttonCalibrateExtrinsic, true);
         addKeyValueTable(currentSettingTable, "Review Training Guide", buttonTraining, true);
-        currentSettingTable.add(buttonReboot).pad(20);
-        currentSettingTable.add(buttonPowerOff).pad(20);
+        currentSettingTable.add(buttonReboot).pad(20 * heightScale);
+        currentSettingTable.add(buttonPowerOff).pad(20 * heightScale);
     }
 
     public void fillSoftwareSettings(){
@@ -115,11 +121,8 @@ public class SettingsScreen extends ScreenAdapter {
 
     public void fillVehiclesSettings(){
         currentSettingTable.clear();
-        addKeyValueTable(currentSettingTable, "Set car", carBrandSelectBox, false);
-        // TODO have to make this components on top?
-        for(int i=0; i < 20; i++){
-            addKeyValueTable(currentSettingTable, " ", " ", false);
-        }
+        currentSettingTable.add(carBrandSelectBox).top().pad(30 * heightScale);
+//        addKeyValueTable(currentSettingTable, "Set car", carBrandSelectBox, false);
     }
 
 
@@ -138,7 +141,7 @@ public class SettingsScreen extends ScreenAdapter {
         AdditionalToggles.add("Always Use Model Path");
         AdditionalToggles.add("UseModelPath");
 
-        stage = new Stage(new FitViewport(1280, 720));
+        stage = new Stage(new ScreenViewport());
         batch = new SpriteBatch();
 
         rootTable = new Table();
@@ -147,16 +150,18 @@ public class SettingsScreen extends ScreenAdapter {
         settingTable = new Table();
         scrollTable = new Table();
         currentSettingTable = new Table();
+        currentSettingTable.setFillParent(true);
 
         rootTable.add(settingTable);
-        rootTable.add(scrollTable).pad(10).padLeft(20);
+        rootTable.add(scrollTable).pad(10 * heightScale).padLeft(20 * widthScale);
 
         scrollPane = new ScrollPane(currentSettingTable);
         scrollPane.setSmoothScrolling(true);
+        scrollPane.setFillParent(true);
         scrollTable.add(scrollPane);
-        scrollTable.setBackground(Utils.createRoundedRectangle(800, 700, 20, new Color(0.18f, 0.18f, 0.18f, 0.8f)));
+        scrollTable.setBackground(Utils.createRoundedRectangle(Math.round(800*widthScale), Math.round(700*heightScale), Math.round(20*widthScale), new Color(0.18f, 0.18f, 0.18f, 0.8f)));
 
-        closeButton = Utils.getImageButton("selfdrive/assets/icons/icon_close.png");
+        closeButton = Utils.getImageButton("icons/icon_close.png");
         closeButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -164,7 +169,7 @@ public class SettingsScreen extends ScreenAdapter {
             }
         });
         closeButton.setColor(1, 1, 1, 0.7f);
-        settingTable.add(closeButton).align(Align.left).padLeft(100).padBottom(70).size(70);
+        settingTable.add(closeButton).align(Align.left).padLeft(100*widthScale).padBottom(70*heightScale).size(70*widthScale);
         settingTable.row();
 
         buttonDevice = getPaddedButton("Device", appContext.skin, "no-bg-bold", 5);
@@ -175,7 +180,7 @@ public class SettingsScreen extends ScreenAdapter {
                 fillDeviceSettings();
             }
         });
-        settingTable.add(buttonDevice).pad(10).align(Align.right);
+        settingTable.add(buttonDevice).pad(10 * heightScale).align(Align.right);
         settingTable.row();
 
         buttonSoftware = getPaddedButton("Software", appContext.skin, "no-bg-bold", 5);
@@ -185,7 +190,7 @@ public class SettingsScreen extends ScreenAdapter {
                 fillSoftwareSettings();
             }
         });
-        settingTable.add(buttonSoftware).pad(10).align(Align.right);
+        settingTable.add(buttonSoftware).pad(10 * heightScale).align(Align.right);
         settingTable.row();
 
         buttonToggle = getPaddedButton("Toggles", appContext.skin, "no-bg-bold", 5);
@@ -195,7 +200,7 @@ public class SettingsScreen extends ScreenAdapter {
                 fillToggleSettings();
             }
         });
-        settingTable.add(buttonToggle).pad(10).align(Align.right);
+        settingTable.add(buttonToggle).pad(10 * heightScale).align(Align.right);
         settingTable.row();
 
         buttonVehicles = getPaddedButton("Vehicles", appContext.skin, "no-bg-bold", 5);
@@ -205,7 +210,7 @@ public class SettingsScreen extends ScreenAdapter {
                 fillVehiclesSettings();
             }
         });
-        settingTable.add(buttonVehicles).pad(10).align(Align.right);
+        settingTable.add(buttonVehicles).pad(10 * heightScale).align(Align.right);
         settingTable.row();
 
         buttonCalibrate = getPaddedButton("RESET", appContext.skin, 5);
@@ -239,7 +244,7 @@ public class SettingsScreen extends ScreenAdapter {
                 dialog.text("Are you sure ?");
                 dialog.button(getPaddedButton("Yes", appContext.skin, 5), true);
                 dialog.button(getPaddedButton("No", appContext.skin, "blue", 5), false);
-                dialog.getContentTable().pad(20);
+                dialog.getContentTable().pad(20 * heightScale);
                 dialog.show(stage);
             }
         });
@@ -248,7 +253,6 @@ public class SettingsScreen extends ScreenAdapter {
         buttonTraining.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                appContext.setScreen(new TrainingScreen(appContext));
             }
         });
 
@@ -275,7 +279,7 @@ public class SettingsScreen extends ScreenAdapter {
                 dialog.text("Are you sure ?");
                 dialog.button(getPaddedButton("Yes", appContext.skin, 5), true);
                 dialog.button(getPaddedButton("No", appContext.skin, "blue", 5), false);
-                dialog.getContentTable().pad(20);
+                dialog.getContentTable().pad(20 * heightScale);
                 dialog.show(stage);
             }
         });
@@ -316,7 +320,7 @@ public class SettingsScreen extends ScreenAdapter {
             ToggleButtons.add(nb);
         }
 
-        String allCars = new utils().readFile("/sdcard/flowpilot/allcars.txt");
+        String allCars = Gdx.files.internal("allcars.txt").readString();
         String[] carArray = allCars.split("\n");
         carBrandSelectBox = new SelectBox<>(appContext.skin);
         carBrandSelectBox.setItems(carArray);
