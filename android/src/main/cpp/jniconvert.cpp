@@ -863,7 +863,6 @@ extern "C" {
     }
 
     void JNICALL Java_ai_flow_android_vision_THNEEDModelRunner_initThneed(JNIEnv *env, jobject obj, jbyteArray modelData) {
-//        byte * modelDataBytes = (byte *)env->GetDirectBufferAddress(modelData);
         jbyte * modelDataBytes = env->GetByteArrayElements(modelData, 0);
         thneed = new ThneedModel((byte*)modelDataBytes, outputs, output_len, 0, false, NULL);
         env->ReleaseByteArrayElements(modelData, modelDataBytes, JNI_ABORT);
