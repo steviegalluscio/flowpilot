@@ -6,19 +6,14 @@ import ai.flow.common.transformations.Camera;
 import ai.flow.common.utils;
 import ai.flow.definitions.Definitions;
 import ai.flow.modeld.ModelExecutor;
-import ai.flow.modeld.ModelExecutorF3;
 import ai.flow.modeld.messages.MsgFrameData;
 import ai.flow.sensor.SensorInterface;
 import ai.flow.sensor.messages.MsgFrameBuffer;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.hardware.camera2.CameraCaptureSession;
-import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.CaptureRequest;
-import android.hardware.camera2.CaptureResult;
-import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.camera2.params.MeteringRectangle;
 import android.hardware.camera2.params.TonemapCurve;
 import android.os.Build;
@@ -32,18 +27,14 @@ import androidx.annotation.RequiresApi;
 import androidx.camera.camera2.interop.Camera2CameraControl;
 import androidx.camera.camera2.interop.Camera2CameraInfo;
 import androidx.camera.camera2.interop.Camera2Interop;
-import androidx.camera.camera2.interop.CaptureRequestOptions;
 import androidx.camera.camera2.interop.ExperimentalCamera2Interop;
 import androidx.camera.core.*;
-import androidx.camera.core.impl.CameraCaptureResult;
-import androidx.camera.core.impl.utils.ExifData;
 import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import messaging.ZMQPubHandler;
-import org.capnproto.PrimitiveList;
 import org.opencv.core.Core;
 
 import java.nio.ByteBuffer;
@@ -54,13 +45,11 @@ import java.util.TimeZone;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
 
 import static ai.flow.android.sensor.Utils.fillYUVBuffer;
 import static ai.flow.common.transformations.Camera.CAMERA_TYPE_ROAD;
 
 import androidx.camera.camera2.Camera2Config;
-import androidx.camera.core.CameraProvider;
 import androidx.camera.core.CameraXConfig;
 
 
@@ -303,8 +292,8 @@ public class CameraManager extends SensorInterface {
         CameraRequests.setCaptureRequestOption(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON);
         CameraRequests.setCaptureRequestOption(CaptureRequest.COLOR_CORRECTION_MODE, CaptureRequest.COLOR_CORRECTION_MODE_FAST);
         CameraRequests.setCaptureRequestOption(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, new Range<>(20, 20));
-//        CameraRequests.setCaptureRequestOption(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_OFF);
-//        CameraRequests.setCaptureRequestOption(CaptureRequest.LENS_FOCUS_DISTANCE, 0f);
+        CameraRequests.setCaptureRequestOption(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_OFF);
+        CameraRequests.setCaptureRequestOption(CaptureRequest.LENS_FOCUS_DISTANCE, 0f);
         ImageAnalysis imageAnalysis = builder.build();
         imageAnalysis.setAnalyzer(ContextCompat.getMainExecutor(context), myAnalyzer);
 

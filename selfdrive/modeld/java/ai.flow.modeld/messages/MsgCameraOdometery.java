@@ -16,6 +16,10 @@ public class MsgCameraOdometery extends MessageBase {
     public PrimitiveList.Float.Builder rotStd;
     public PrimitiveList.Float.Builder trans;
     public PrimitiveList.Float.Builder transStd;
+//    public PrimitiveList.Float.Builder wideFromDeviceEuler;
+//    public PrimitiveList.Float.Builder wideFromDeviceEulerStd;
+//    public PrimitiveList.Float.Builder roadTransformTrans;
+//    public PrimitiveList.Float.Builder roadTransformTransStd;
 
     public MsgCameraOdometery(ByteBuffer rawMessageBuffer) {
         super(rawMessageBuffer);
@@ -39,6 +43,10 @@ public class MsgCameraOdometery extends MessageBase {
         rotStd = odometry.initRotStd(3);
         trans = odometry.initTrans(3);
         transStd = odometry.initTransStd(3);
+//        wideFromDeviceEuler = odometry.initWideFromDeviceEuler(3);
+//        wideFromDeviceEulerStd = odometry.initWideFromDeviceEulerStd(3);
+//        roadTransformTrans = odometry.initRoadTransformTrans(3);
+//        roadTransformTransStd = odometry.initRoadTransformTransStd(3);
     }
 
     public void fill(ParsedOutputs parsed, long timestamp, int frameId) {

@@ -203,6 +203,8 @@ public class CalibrateScreen extends ScreenAdapter {
                 byte[] cameraMatrixBuffer = MatToByte(calibrator.cameraMatrix);
                 byte[] distortionCoefficientsBuffer = MatToByte(calibrator.distortionCoefficients);
 
+                System.out.println("MATRIX: " + calibrator.cameraMatrix.dump());
+
                 params.put(intrinsicParamName, cameraMatrixBuffer);
                 params.put(distortionParamName, distortionCoefficientsBuffer);
 

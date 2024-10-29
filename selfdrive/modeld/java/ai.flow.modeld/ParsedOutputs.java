@@ -29,6 +29,9 @@ public class ParsedOutputs {
     public float[] transStd;
     public float[] rot;
     public float[] rotStd;
+//    public float[] wideFromDeviceEuler;
+//    public float[] roadTransform;
+//    public float[] action;
 
     public ParsedOutputs(){
         this.initLanes();
@@ -86,6 +89,7 @@ public class ParsedOutputs {
         transStd = new float[3];
         rot = new float[3];
         rotStd = new float[3];
+//        wideFromDeviceEuler = new float[2];
     }
 
     public void initLeads(){

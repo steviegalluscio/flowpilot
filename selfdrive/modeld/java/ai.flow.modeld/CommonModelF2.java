@@ -24,10 +24,16 @@ public class CommonModelF2 {
     public static final int SIZE_ModelOutputMeta = 352 / 4;
     public static final int SIZE_ModelOutputPose = 48 / 4;
     public static final int SIZE_ModelOutputLinesXY = 1056 / 4;
+
+    public static final int SIZE_ModelOutputWideFromDeviceEuler = 24 / 4;
+    public static final int SIZE_ModelOutputRoadTransform = 48 / 4;
+    public static final int SIZE_LateralAction = 4 / 4;
+
     public static final int SIZE_ModelOutputStopLinePrediction = 68 / 4;
     public static final int SIZE_Total = SIZE_ModelOutputPlans + SIZE_ModelOutputLaneLines + SIZE_ModelOutputRoadEdges +
                                          SIZE_ModelOutputLeads + SIZE_ModelOutputMeta +
                                          SIZE_ModelOutputPose;
+    // + SIZE_ModelOutputWideFromDeviceEuler + SIZE_ModelOutputRoadTransform + SIZE_LateralAction;
     public static final int SIZE_ModelOutputLeadPrediction = 204 / 4;
     public static final int DESIRE_LEN = 8;
     public static final int STOP_LINE_MHP_N = 3;

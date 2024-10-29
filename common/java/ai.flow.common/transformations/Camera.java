@@ -9,15 +9,18 @@ public class Camera {
 
     public static final boolean FORCE_TELE_CAM_F3 = false;
 
-    // lots of important stuff calculated from this
-    // current set to LG G8 wide camera
     public static float
-        FocalX = 630f,
-        FocalY = 630f,
-        CenterX = 640f,
-        CenterY = 360f;
+        FocalX = 538f,
+        FocalY = 538f,
+        CenterX = 640f, //632
+        CenterY = 360f; //358
 
-    public static int UseCameraID = 0;
+    // Camera 2
+   // MATRIX: [538.2648047477589, 0, 635.4029785884212;
+//0, 538.3225487046863, 348.6366566852139;
+ //0, 0, 1]
+
+    public static int UseCameraID = 2;
 
     // everything autocalculated below
     public static float actual_cam_focal_length = (FocalX + FocalY) * 0.5f;
