@@ -1,0 +1,8 @@
+Import('env', 'arch', 'cereal', 'messaging', 'common')
+
+libs = [common, cereal, 'messaging', 'thneed',
+        'zmq', 'capnp', 'kj', 'z', 'modelparser', 'json11']
+
+src = ['thneedrunner.cpp']
+
+env.SharedLibrary('thneedrunner', src, LIBS=libs)

@@ -67,7 +67,7 @@ else:
 
 lenv = {
   "PATH": "/home/fgx/.buildozer/android/platform/android-ndk-r25b/toolchains/llvm/prebuilt/linux-x86_64/bin/:/home/fgx/p4a2/venv/bin:/bin:/usr/local/bin/", #os.environ['PATH'],
-  "LD_LIBRARY_PATH": ["/home/fgx/p4a2/.buildozer/android/platform/build-arm64-v8a/build/libs_collections/oscservice/arm64-v8a"],
+  "LD_LIBRARY_PATH": ["/home/fgx/flowy/.buildozer/android/platform/build-arm64-v8a/build/libs_collections/oscservice/arm64-v8a"],
   "PYTHONPATH": Dir("#").abspath + ':' + Dir(f"#third_party/acados").abspath,
 
   "ACADOS_SOURCE_DIR": Dir("#third_party/acados").abspath,
@@ -140,16 +140,19 @@ env = Environment(
     "#third_party/snpe/include",
     "#third_party/lmdb",
     "#third_party/qrcode",
+    "#third_party/capnproto/c++/src",
     "#third_party",
+    "#selfdrive/modeld",
+    "#third_party/libOpenCL-loader/include",
     "#cereal",
     "#common",
     "#msgq",
     "#opendbc/can",
     # "/home/fgx/openpilot/third_party",
-    "/home/fgx/p4a2/.buildozer/android/platform/build-arm64-v8a/build/other_builds/capnp/arm64-v8a__ndk_target_24/capnp/c++/src/",
-    "/home/fgx/p4a2/.buildozer/android/platform/build-arm64-v8a/build/other_builds/libzmq/arm64-v8a__ndk_target_24/libzmq/include/",
-    "/home/fgx/p4a2/.buildozer/android/platform/build-arm64-v8a/build/other_builds/python3/arm64-v8a__ndk_target_24/python3/Include/",
-    "/home/fgx/p4a2/.buildozer/android/platform/build-arm64-v8a/build/python-installs/oscservice/arm64-v8a/numpy/core/include/",
+    # "/home/fgx/flowy/.buildozer/android/platform/build-arm64-v8a/build/other_builds/capnp/arm64-v8a__ndk_target_24/capnp/c++/src/",
+    "/home/fgx/flowy/.buildozer/android/platform/build-arm64-v8a/build/other_builds/libzmq/arm64-v8a__ndk_target_24/libzmq/include/",
+    "/home/fgx/flowy/.buildozer/android/platform/build-arm64-v8a/build/other_builds/python3/arm64-v8a__ndk_target_24/python3/Include/",
+    "/home/fgx/flowy/.buildozer/android/platform/build-arm64-v8a/build/python-installs/oscservice/arm64-v8a/numpy/core/include/",
     # "/usr/local/include/capnp/",
   ],
 
@@ -163,21 +166,24 @@ env = Environment(
   RPATH=rpath,
 
   CFLAGS=["-std=gnu11"] + cflags,
-  CXXFLAGS=["-std=c++1z"] + cxxflags,
+  CXXFLAGS=["-std=c++17"] + cxxflags,
   LIBPATH=libpath + [
     "#msgq_repo",
     "#third_party",
     "#third_party/json11",
     "#third_party/libusb/android/libs/arm64-v8a",
-    "#third_party/opencl",
+    "#third_party/CL",
     "#third_party/lmdb",
     "#selfdrive/pandad",
     "#common",
+    "#cereal",
+    "#third_party/libOpenCL-loader/projects/android/obj/local/arm64-v8a/",
+    "#selfdrive/modeld",
     "#rednose/helpers",
     # "/home/fgx/openpilot/cereal",
     # "/home/fgx/.buildozer/android/platform/android-ndk-r25b/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib",
-    "/home/fgx/p4a2/.buildozer/android/platform/build-arm64-v8a/build/libs_collections/flowy/arm64-v8a",
-    "/home/fgx/p4a2/.buildozer/android/platform/build-arm64-v8a/build/other_builds/python3/arm64-v8a__ndk_target_24/python3/android-build",
+    "/home/fgx/flowy/.buildozer/android/platform/build-arm64-v8a/build/libs_collections/python/arm64-v8a/",
+    "/home/fgx/flowy/.buildozer/android/platform/build-arm64-v8a/build/other_builds/python3/arm64-v8a__ndk_target_24/python3/android-build",
     "/home/fgx/.buildozer/android/platform/android-ndk-r25b/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android/32",
   ],
   CYTHONCFILESUFFIX=".cpp",
@@ -188,7 +194,7 @@ env = Environment(
 )
 
 # Cython build enviroment
-py_include = "/home/fgx/p4a2/.buildozer/android/platform/build-arm64-v8a/build/other_builds/python3/arm64-v8a__ndk_target_24/python3/Include/" # sysconfig.get_paths()['include']
+py_include = "/home/fgx/flowy/.buildozer/android/platform/build-arm64-v8a/build/other_builds/python3/arm64-v8a__ndk_target_24/python3/Include/" # sysconfig.get_paths()['include']
 envCython = env.Clone()
 envCython["CPPPATH"] += [py_include] #, np.get_include()]
 envCython["CCFLAGS"] += ["-Wno-#warnings", "-Wno-shadow", "-Wno-deprecated-declarations"]
@@ -206,12 +212,12 @@ QCOM_REPLAY = False
 Export('env', 'arch', 'QCOM_REPLAY', 'SHARED')
 
 SConscript(['common/SConscript'])
-Import('_common')
+Import('_common', '_gpucommon')
 
 common = [_common, 'json11', 'lmdb']
+gpucommon = _gpucommon
 
-
-Export('common')
+Export('common', 'gpucommon')
 
 envCython = env.Clone()
 envCython["CPPPATH"] += [np.get_include()]
@@ -295,6 +301,7 @@ SConscript(['selfdrive/controls/lib/longitudinal_mpc_lib/SConscript'])
 # SConscript(['selfdrive/locationd/SConscript'])
 SConscript(['selfdrive/boardd/SConscript'])
 SConscript(['selfdrive/loggerd/SConscript'])
+SConscript(['thneedrunner/SConscript'])
 
 # if GetOption('test'):
 #   SConscript('panda/tests/safety/SConscript')

@@ -9,7 +9,6 @@
 #include <cerrno>
 #include <cstring>
 #include <map>
-#include <chrono>
 
 #include "thneedmodel.h"
 #include "clutil.h"
@@ -667,6 +666,7 @@ int CLQueuedKernel::get_arg_num(const char *search_arg_name) {
     }
     __android_log_print(ANDROID_LOG_INFO, "JNILOG","failed to find %s in %s\n", search_arg_name, name.c_str());
     assert(false);
+    return -1;
 }
 
 cl_int CLQueuedKernel::exec() {
@@ -819,13 +819,13 @@ void ThneedModel::execute() {
     }
 }
 
-const int TRAJECTORY_SIZE = 33;
-const int FEATURE_LEN = 512;
-const int HISTORY_BUFFER_LEN = 99;
-const int OUTPUT_SIZE = 5992;
+// const int TRAJECTORY_SIZE = 33;
+// const int FEATURE_LEN = 512;
+// const int HISTORY_BUFFER_LEN = 99;
+// const int OUTPUT_SIZE = 5992;
 const int LATERAL_CONTROL_PARAMS_LEN = 2;
 const int PREV_DESIRED_CURVS_LEN = 1 * (HISTORY_BUFFER_LEN + 1);
-const int DESIRED_CURV_WIDTH = 1;
+// const int DESIRED_CURV_WIDTH = 1;
 
 std::string *pathString;
 jfloat* outputs;
@@ -836,6 +836,7 @@ float *features_buf;
 float *prev_curvs_buf;
 int zero_len = 1024 / 4;
 int features_len = HISTORY_BUFFER_LEN * FEATURE_LEN;
+PubMaster pm({"modelV2", "cameraOdometry"});
 
 extern "C" {
 
@@ -873,9 +874,7 @@ extern "C" {
             JNIEnv *env,
             jobject obj,
             jfloatArray input,
-            jint last_frame,
-            jlong start_time
-        ) {
+            jint frameId) {
         // buffers
         jfloat *input_buf = env->GetFloatArrayElements(input, 0);
 
@@ -915,12 +914,9 @@ extern "C" {
         // get the outputs
         // jfloatArray result = env->NewFloatArray(output_len);
         // env->SetFloatArrayRegion(result, 0, output_len, outputs);
-
-        model_publish(pm, last_frame, last_frame, last_frame, 0, 
-                  outputs, 0, end-start, true);
-        posenet_publish(pm, last_frame, 0, outputs, 0, true);
-
-        // return result;
+        model_publish(pm, frameId, frameId, frameId, 0, 
+                  outputs, 0, 1, true);
+        posenet_publish(pm, frameId, 0, outputs, 0, true);
     }
 
 } // extern "C"
