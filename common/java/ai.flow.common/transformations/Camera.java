@@ -10,8 +10,8 @@ public class Camera {
     public static final boolean FORCE_TELE_CAM_F3 = false;
 
     public static float
-        FocalX = 538f,
-        FocalY = 538f,
+        FocalX = 930f,
+        FocalY = 930f,
         CenterX = 640f, //632
         CenterY = 360f; //358
 
@@ -20,11 +20,11 @@ public class Camera {
 //0, 538.3225487046863, 348.6366566852139;
  //0, 0, 1]
 
-    public static int UseCameraID = 2;
+    public static int UseCameraID = 0;
 
     // everything autocalculated below
     public static float actual_cam_focal_length = (FocalX + FocalY) * 0.5f;
-    public static float digital_zoom_apply = 1; //actual_cam_focal_length / (utils.F2 ? Model.MEDMODEL_F2_FL : Model.MEDMODEL_FL);
+    public static float digital_zoom_apply = 1f; //actual_cam_focal_length / (utils.F2 ? Model.MEDMODEL_F2_FL : Model.MEDMODEL_FL);
     public static final int[] frameSize = new int[]{1280, 720};
     public static float OffsetX = CenterX - (frameSize[0]*0.5f);
     public static float OffsetY = CenterY - (frameSize[1]*0.5f);

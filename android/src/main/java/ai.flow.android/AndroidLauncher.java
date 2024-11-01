@@ -1,15 +1,15 @@
 package ai.flow.android;
 
-import ai.flow.android.sensor.CameraManager;
+import ai.flow.android.sensor.CameraHandler;
+import ai.flow.android.sensor.CameraManager2;
 import ai.flow.android.sensor.SensorManager;
-import ai.flow.android.vision.ONNXModelRunner;
-import ai.flow.android.vision.SNPEModelRunner;
+//import ai.flow.android.vision.ONNXModelRunner;
+//import ai.flow.android.vision.SNPEModelRunner;
 import ai.flow.android.vision.THNEEDModelRunner;
 import ai.flow.app.FlowUI;
 import ai.flow.common.ParamsInterface;
 import ai.flow.common.Path;
 import ai.flow.common.transformations.Camera;
-import ai.flow.common.transformations.Model;
 import ai.flow.common.utils;
 import ai.flow.hardware.HardwareManager;
 import ai.flow.launcher.Launcher;
@@ -17,7 +17,6 @@ import ai.flow.modeld.*;
 import ai.flow.sensor.SensorInterface;
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Process;
 import android.os.*;
 import android.provider.Settings;
@@ -29,23 +28,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.Toast;
+
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentTransaction;
 import com.badlogic.gdx.backends.android.AndroidApplicationConfiguration;
 import com.badlogic.gdx.backends.android.AndroidFragmentApplication;
-import com.termux.shared.termux.TermuxConstants;
 
 import org.acra.ACRA;
 import org.acra.ErrorReporter;
 import org.jetbrains.annotations.NotNull;
-import org.nd4j.linalg.api.ndarray.INDArray;
-import org.nd4j.linalg.factory.Nd4j;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.*;
 
 import ai.flow.android.sensor.PandaManager;
@@ -108,10 +100,9 @@ public class AndroidLauncher extends FragmentActivity implements AndroidFragment
 		params.put("DeviceModel", Build.MODEL);
 
 		AndroidApplicationConfiguration configuration = new AndroidApplicationConfiguration();
-		CameraManager cameraManager, cameraManagerWide = null;
-		SensorManager sensorManager = new SensorManager(appContext, 20);
-		cameraManager = new CameraManager(getApplication().getApplicationContext(), utils.F2 || Camera.FORCE_TELE_CAM_F3 ? Camera.CAMERA_TYPE_ROAD : Camera.CAMERA_TYPE_WIDE);
-		CameraManager finalCameraManager = cameraManager; // stupid java
+//		SensorManager sensorManager = new SensorManager(appContext, 20);
+		CameraHandler cameraHandler = new CameraHandler(getApplication().getApplicationContext());
+
 		PandaManager pandaManager = new PandaManager(getApplication().getApplicationContext());
 		OnroadManager onroadManager = new OnroadManager(getApplication().getApplicationContext());
 		ModelparsedManager modelparsedManager = new ModelparsedManager(getApplication().getApplicationContext());
@@ -121,9 +112,8 @@ public class AndroidLauncher extends FragmentActivity implements AndroidFragment
 			put("modelparsed", modelparsedManager);
 		}};
 		sensors = new HashMap<String, SensorInterface>() {{
-			put("roadCamera", finalCameraManager);
-			put("wideRoadCamera", finalCameraManager); // use same camera until we move away from wide camera-only mode.
-			put("motionSensors", sensorManager);
+			put("roadCamera", cameraHandler);
+//			put("motionSensors", sensorManager);
 		}};
 
 
@@ -134,15 +124,15 @@ public class AndroidLauncher extends FragmentActivity implements AndroidFragment
 		ModelRunner model = null;
 		boolean useGPU = true; // always use gpus on android phones.
 		switch (utils.Runner) {
-			case SNPE:
-				model = new SNPEModelRunner(getApplication(), modelPath, useGPU);
-				break;
-			case TNN:
-				model = new TNNModelRunner(modelPath, useGPU);
-				break;
-			case ONNX:
-				model = new ONNXModelRunner(modelPath, useGPU);
-				break;
+//			case SNPE:
+//				model = new SNPEModelRunner(getApplication(), modelPath, useGPU);
+//				break;
+//			case TNN:
+//				model = new TNNModelRunner(modelPath, useGPU);
+//				break;
+//			case ONNX:
+//				model = new ONNXModelRunner(modelPath, useGPU);
+//				break;
 			case THNEED:
 				model = new THNEEDModelRunner(modelPath, getApplication());
 				break;
@@ -165,7 +155,7 @@ public class AndroidLauncher extends FragmentActivity implements AndroidFragment
 		if (utils.Runner == utils.USE_MODEL_RUNNER.EXTERNAL_TINYGRAD)
 			modelExecutor = new ModelExecutorExternal();
 		else
-			modelExecutor = utils.F2 ? new ModelExecutorF2(model) : new ModelExecutorF3(model);
+			modelExecutor = new ModelExecutorF3(model);
 		Launcher launcher = new Launcher(sensors, modelExecutor, managers);
 
 
@@ -181,8 +171,8 @@ public class AndroidLauncher extends FragmentActivity implements AndroidFragment
 
 
 		MainFragment fragment = new MainFragment(new FlowUI(launcher, androidHardwareManager, pid));
-		cameraManager.setLifeCycleFragment(fragment);
-		if (cameraManagerWide != null) cameraManagerWide.setLifeCycleFragment(fragment);
+//		cameraManager.setLifeCycleFragment(fragment);
+//		if (cameraManagerWide != null) cameraManagerWide.setLifeCycleFragment(fragment);
 		FragmentTransaction trans = getSupportFragmentManager().beginTransaction();
 		trans.replace(android.R.id.content, fragment);
 		trans.commit();

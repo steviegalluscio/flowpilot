@@ -1,61 +1,14 @@
 package ai.flow.modeld;
 
-import ai.flow.common.SizeMapArrayPool;
+public class ParserF3 {
+    public static final int TRAJECTORY_SIZE = 33;
+    public static final int PLAN_MHP_N = 5;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+    private ModelOutput model;
 
-import static ai.flow.modeld.CommonModelF2.*;
 
-public class Parser {
-    public ParsedOutputs parsed = new ParsedOutputs();
-    public ArrayList<LeadDataV3> leads = parsed.leads;
-    public MetaData metaDataOutput = parsed.metaData;
-
-    public float[][] meta = parsed.meta;
-    public float[][] pose = parsed.pose;
-    public float[][] state = parsed.state;
-
-    public float[] trans = parsed.trans;
-    public float[] transStd = parsed.transStd;
-    public float[] rot = parsed.rot;
-    public float[] rotStd = parsed.rotStd;
-    public float[] laneLineProbs = parsed.laneLineProbs;
-    public float[] laneLineStds = parsed.laneLineStds;
-    public ArrayList<ArrayList<float[]>> laneLines = parsed.laneLines;
-    public ArrayList<ArrayList<float[]>> roadEdges = parsed.roadEdges;
-    public float[] roadEdgeStds = parsed.roadEdgeStds;
-
-    public Map<String, float[]> net_outputs = new HashMap<String, float[]>();
-    public float[] plan_t_arr = new float[TRAJECTORY_SIZE];
-    public float[] best_plan = new float[PLAN_MHP_GROUP_SIZE];
-    public float stopSignProb;
-
-    public SizeMapArrayPool pool = new SizeMapArrayPool();
-
-    public Parser(){
-        net_outputs.put("plan", new float[SIZE_ModelOutputPlans]);
-        net_outputs.put("laneLines", new float[SIZE_ModelOutputLaneLines]);
-        net_outputs.put("roadEdges", new float[SIZE_ModelOutputRoadEdges]);
-        net_outputs.put("lead", new float[SIZE_ModelOutputLeads]);
-        net_outputs.put("meta", new float[SIZE_ModelOutputMeta]);
-        net_outputs.put("pose", new float[SIZE_ModelOutputPose]);
-//        net_outputs.put("stopLines", new float[SIZE_ModelOutputStopLines]);
-        net_outputs.put("state", new float[TEMPORAL_SIZE]);
-    }
-
-    public void copyOfRange(float[] src, float[] dst, int start, int end){
-        for (int i=start; i<end; i++){
-            dst[i-start] = src[i];
-        }
-    }
-
-    public void copyOfRangeOffset(float[] src, float[] dst, int start, int length){
-        for (int i=start; i<start+length; i++){
-            dst[i-start] = src[i];
-        }
+    public ParserF3(ModelOutput model){
+        this.model = model;
     }
 
     public float getMax(float[] x){
@@ -88,7 +41,7 @@ public class Parser {
         return output;
     }
 
-    public static float sigmoid(float x)
+    public float sigmoid(float x)
     {
         return  1.0f/ (float)(1 + Math.exp(-x));
     }
@@ -335,6 +288,7 @@ public class Parser {
     }
 
     public ParsedOutputs parser(float[] outs){
+        System.out.println("FIRST FLOAT: " + outs[0]);
         copyOfRange(outs, net_outputs.get("lead"), LEAD_IDX, LEAD_IDX + SIZE_ModelOutputLeads);
         copyOfRange(outs, net_outputs.get("meta"), META_IDX, META_IDX + SIZE_ModelOutputMeta);
         copyOfRange(outs, net_outputs.get("pose"), POSE_IDX, POSE_IDX + SIZE_ModelOutputPose);

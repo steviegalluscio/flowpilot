@@ -587,6 +587,7 @@ public class OnRoadScreen extends ScreenAdapter {
 //        Definitions.LateralPlan.Reader latPlan = sh.recv("lateralPlan").getLateralPlan();
 //        PrimitiveList.Float.Reader pathpoints = latPlan.getDPathPoints();
         MsgModelDataV2.fillParsed(parsed, event.getModelV2(), true);
+        System.out.println("LLPL2: " + parsed.laneLineProbs[0]);
 
         Matrix4 Rt = new Matrix4().setFromEulerAnglesRad(-augmentRot.y, -augmentRot.z, -augmentRot.x);
         Matrix4 RtPath = new Matrix4().setFromEulerAnglesRad(-augmentRot.y, -augmentRot.z, -augmentRot.x).translate(0f, 1.28f, 0f);
@@ -809,14 +810,14 @@ public class OnRoadScreen extends ScreenAdapter {
 //                UpdateIP();
 //            }
 
-//            batch.begin();
-//            appContext.font.setColor(1, 1, 1, 1);
-//            appContext.font.draw(batch, "L1: " + Line1 + "\nL2: " + Line2,3,200);
-//            appContext.font.draw(batch, utils.F2 ? "Medium Model" : "Big Model", Gdx.graphics.getWidth() - 450f, 300f);
-//            appContext.font.draw(batch, "v" + VERSION + ", E" + CamExposure + ":" + currentExposureIndex, Gdx.graphics.getWidth() - 450f, 225f);
-//            appContext.font.draw(batch, tempStr + ", " + ModelExecutorF3.AvgIterationTime + "ms", Gdx.graphics.getWidth() - 450f, 150f);
-//            appContext.font.draw(batch, IPstring, Gdx.graphics.getWidth() - 450f, 75f);
-//            batch.end();
+            batch.begin();
+            appContext.font.setColor(1, 1, 1, 1);
+            appContext.font.draw(batch, "L1: " + Line1 + "\nL2: " + Line2,3,200);
+            appContext.font.draw(batch, utils.F2 ? "Medium Model" : "Big Model", Gdx.graphics.getWidth() - 450f, 300f);
+            appContext.font.draw(batch, "v" + VERSION + ", E" + CamExposure + ":" + currentExposureIndex, Gdx.graphics.getWidth() - 450f, 225f);
+            appContext.font.draw(batch, tempStr + ", " + ModelExecutorF3.AvgIterationTime + "ms", Gdx.graphics.getWidth() - 450f, 150f);
+            appContext.font.draw(batch, IPstring, Gdx.graphics.getWidth() - 450f, 75f);
+            batch.end();
         }
         else{
             stopSounds();

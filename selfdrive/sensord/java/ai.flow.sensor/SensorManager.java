@@ -1,6 +1,11 @@
 package ai.flow.sensor;
 
-public class SensorManager extends SensorInterface {
+public class SensorManager implements SensorInterface {
+
+    @Override
+    public void dispose() {
+
+    }
 
     @Override
     public void start() {
@@ -10,10 +15,5 @@ public class SensorManager extends SensorInterface {
     @Override
     public void stop() {
         /** Add your custom implementation here **/
-    }
-
-    @Override
-    public boolean isRunning() {
-        return true;
     }
 }

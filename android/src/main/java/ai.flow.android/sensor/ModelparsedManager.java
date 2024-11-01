@@ -7,7 +7,7 @@ import ai.flow.sensor.SensorInterface;
 
 import ai.flow.flowy.ServiceModelparsed;
 
-public class ModelparsedManager extends SensorInterface {
+public class ModelparsedManager implements SensorInterface {
     private Context ctx;
 
     public ModelparsedManager(Context ctx) {
@@ -16,7 +16,7 @@ public class ModelparsedManager extends SensorInterface {
 
     public void start() {
         System.out.println("Modelparsed was called, starting services!");
-        ServiceModelparsed.start(ctx);
+//        ServiceModelparsed.start(ctx);
         // Context ctx = this.ctx
 //        new java.util.Timer().schedule(
 //            new java.util.TimerTask() {
@@ -32,5 +32,10 @@ public class ModelparsedManager extends SensorInterface {
     }
     public void stop() {
         this.ctx.stopService(new Intent(this.ctx, ServiceModelparsed.class));
+    }
+
+    @Override
+    public void dispose() {
+
     }
 }

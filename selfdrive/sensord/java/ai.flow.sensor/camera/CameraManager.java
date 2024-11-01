@@ -25,7 +25,7 @@ import static ai.flow.common.BufferUtils.bufferFromAddress;
 import static ai.flow.common.BufferUtils.byteToFloat;
 import static ai.flow.common.transformations.Camera.CAMERA_TYPE_ROAD;
 
-public class CameraManager extends SensorInterface implements Runnable {
+public class CameraManager implements SensorInterface, Runnable {
     public Thread thread;
     public boolean stopped = false;
     public boolean exit = false;

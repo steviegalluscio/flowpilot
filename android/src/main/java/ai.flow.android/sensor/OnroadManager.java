@@ -13,11 +13,16 @@ import ai.flow.python.ServiceFlowreset;
 
 import ai.flow.flowy.ServiceModelparsed;
 
-public class OnroadManager extends SensorInterface {
+public class OnroadManager implements SensorInterface {
     private Context ctx;
 
     public OnroadManager(Context ctx) {
         this.ctx = ctx;
+    }
+
+    @Override
+    public void dispose() {
+
     }
 
     public void start() {

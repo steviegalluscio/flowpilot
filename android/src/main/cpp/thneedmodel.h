@@ -4,6 +4,7 @@
 
 #include "runmodel.h"
 #include "thneed.h"
+#include "messaging/messaging.h"
 
 class ThneedModel : public RunModel {
 public:
@@ -12,6 +13,7 @@ public:
   void execute();
 private:
   Thneed *thneed = NULL;
+  PubMaster pm({"modelV2", "cameraOdometry"});
   bool recorded;
   float *output;
 };

@@ -6,7 +6,10 @@ import ai.flow.common.utils;
 import ai.flow.definitions.Definitions;
 import ai.flow.modeld.messages.MsgCameraOdometery;
 import ai.flow.modeld.messages.MsgModelRaw;
+import ai.flow.modeld.ModelOutput;
 import ai.flow.modeld.messages.MsgModelDataV2;
+import io.kaitai.struct.ByteBufferKaitaiStream;
+import io.kaitai.struct.KaitaiStream;
 import messaging.ZMQPubHandler;
 import messaging.ZMQSubHandler;
 import org.capnproto.PrimitiveList;
@@ -24,7 +27,9 @@ import org.nd4j.linalg.indexing.NDArrayIndex;
 import org.opencv.core.Core;
 
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -60,7 +65,7 @@ public class ModelExecutorF3 extends ModelExecutor {
     public INDArray featuresNDArr;
     public INDArray navfeaturesNDArr;
     public INDArray navinstructNDArr;
-    public final float[] netOutputs = new float[(int)numElements(outputTensorShape)];
+    public final float[]netOutputs = new float[(int)numElements(outputTensorShape)];
     public final float[]prevDesire = new float[CommonModelF3.DESIRE_LEN];
     public final float[]desireIn = new float[CommonModelF3.DESIRE_LEN];
     public final Map<String, INDArray> inputMap =  new HashMap<>();
@@ -69,7 +74,7 @@ public class ModelExecutorF3 extends ModelExecutor {
     public final ParamsInterface params = ParamsInterface.getInstance();
 
     public static final int[] FULL_FRAME_SIZE = Camera.frameSize;
-    public final ZMQPubHandler ph = new ZMQPubHandler();
+//    public final ZMQPubHandler ph = new ZMQPubHandler();
     public final ZMQSubHandler sh = new ZMQSubHandler(true);
     public MsgModelRaw msgModelRaw = new MsgModelRaw(CommonModelF3.NET_OUTPUT_SIZE);
 //    public MsgModelDataV2 msgModelDataV2 = new MsgModelDataV2();
@@ -161,34 +166,13 @@ public class ModelExecutorF3 extends ModelExecutor {
 
         inputMap.put("input_imgs", netInputBuffer);
         inputMap.put("big_input_imgs", netInputWideBuffer);
-        modelRunner.run(inputMap, outputMap);
-
-        // we handle features in JNI for THNEED
-        if (utils.Runner != utils.USE_MODEL_RUNNER.THNEED) {
-            // featureTensorShape, 1, FEATURE_LEN, HISTORY_LEN
-            featuresNDArr.put(featureRotateSlice0, featuresNDArr.get(featureRotateSlice1));
-            if (utils.Runner == utils.USE_MODEL_RUNNER.SNPE) {
-                for (int i = 0; i < CommonModelF3.FEATURE_LEN; i++)
-                    featuresNDArr.putScalar(0, i,CommonModelF3.HISTORY_BUFFER_LEN - 1, netOutputs[CommonModelF3.OUTPUT_SIZE + i]); // SNPE
-            } else {
-                for (int i = 0; i < CommonModelF3.FEATURE_LEN; i++)
-                    featuresNDArr.putScalar(0, CommonModelF3.HISTORY_BUFFER_LEN - 1, i, netOutputs[CommonModelF3.OUTPUT_SIZE + i]);
-            }
-        }
+        modelRunner.run(inputMap, lastFrameID);
 
         // publish outputs
         end = System.currentTimeMillis();
 
-//        Parser parser = new Parser();
-//        ParsedOutputs parsedOutputs = parser.parser(netOutputs);
-//        msgModelDataV2.fill(parsedOutputs, processStartTimestamp, lastFrameID, 0, 0f, end-start, end-start);
-//        msgCameraOdometery.fill(parsedOutputs, processStartTimestamp, lastFrameID);
-//
-//        ph.publishBuffer("modelV2", msgModelDataV2.serialize(true));
-//        ph.publishBuffer("cameraOdometry", msgCameraOdometery.serialize(true));
-
-        msgModelRaw.fill(netOutputs, processStartTimestamp, lastFrameID, 0, 0f, end - start);
-        ph.publishBuffer("modelRaw", msgModelRaw.serialize(true));
+//        msgModelRaw.fill(netOutputs, processStartTimestamp, lastFrameID, 0, 0f, end - start);
+//        ph.publishBuffer("modelRaw", msgModelRaw.serialize(true));
 
         // compute runtime stats every 10 runs
         timePerIt += end - processStartTimestamp;
@@ -230,7 +214,7 @@ public class ModelExecutorF3 extends ModelExecutor {
         navinstructNDArr = Nd4j.zeros(navInstructionsTensorShape);
 
 //        ph.createPublishers(Arrays.asList("modelV2", "cameraOdometry"));
-        ph.createPublishers(Arrays.asList("modelRaw"));
+//        ph.createPublishers(Arrays.asList("modelRaw"));
         sh.createSubscribers(Arrays.asList("pulseDesire", "liveCalibration", "lateralPlan"));
 
         inputShapeMap.put("input_imgs", imgTensorShape);
@@ -315,7 +299,7 @@ public class ModelExecutorF3 extends ModelExecutor {
         modelRunner.dispose();
         imagePrepare.dispose();
         imageWidePrepare.dispose();
-        ph.releaseAll();
+//        ph.releaseAll();
     }
 
     public void stop() {

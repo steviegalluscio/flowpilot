@@ -17,8 +17,8 @@ public class Draw {
     public static final float LEAD_Y_SCALE = 10f;
 
     public static Matrix4 cam_intrinsics = new Matrix4(new float[] {
-            538.f,  0.0f, 0.0f, 0.f,
-            0.0f, 538.f, 0.0f, 0.f,
+            930.f,  0.0f, 0.0f, 0.f,
+            0.0f, 930.f, 0.0f, 0.f,
             640.0f, 360.0f, 1.0f, 0.f,
             0.f, 0.f, 0.f, 0.f
     });

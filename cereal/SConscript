@@ -38,7 +38,7 @@ messaging_objects = env.SharedObject([
   'messaging/socketmaster.cc',
 ])
 
-messaging = env.Library('messaging', messaging_objects)
+messaging = env.SharedLibrary('messaging', messaging_objects)
 Depends('messaging/impl_zmq.cc', services_h)
 
 env.Program('messaging/bridge', ['messaging/bridge.cc'], LIBS=[messaging, 'zmq', common])

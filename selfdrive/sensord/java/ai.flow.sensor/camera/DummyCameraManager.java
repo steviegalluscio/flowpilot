@@ -2,7 +2,12 @@ package ai.flow.sensor.camera;
 
 import ai.flow.sensor.SensorInterface;
 
-public class DummyCameraManager extends SensorInterface implements Runnable {
+public class DummyCameraManager implements SensorInterface, Runnable {
+    @Override
+    public void dispose() {
+
+    }
+
     public void start() {
     }
 

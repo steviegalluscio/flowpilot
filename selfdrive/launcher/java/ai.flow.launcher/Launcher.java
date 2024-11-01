@@ -34,8 +34,8 @@ public class Launcher {
 
     public void startSensorD() {
         for (String sensorName : sensors.keySet()) {
-            if (!sensors.get(sensorName).isRunning())
-                sensors.get(sensorName).start();
+//            if (!sensors.get(sensorName).isRunning())
+            sensors.get(sensorName).start();
         }
     }
 
@@ -66,7 +66,7 @@ public class Launcher {
 
         String modelPath = Path.getModelDir();
 
-        ModelRunner model = new TNNModelRunner(modelPath, true);
+        ModelRunner model = null;//new TNNModelRunner(modelPath, true);
 
         ModelExecutor modelExecutor;
         modelExecutor = new ModelExecutorF3(model);

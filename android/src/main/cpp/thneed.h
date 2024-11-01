@@ -129,7 +129,7 @@ class Thneed {
     vector<shared_ptr<CLQueuedKernel> > ckq;
 
     // loading
-    void load(byte* buf);
+    void load(uint8_t * buf);
   private:
     void clinit();
 };

@@ -27,6 +27,7 @@ import androidx.annotation.RequiresApi;
 import androidx.camera.camera2.interop.Camera2CameraControl;
 import androidx.camera.camera2.interop.Camera2CameraInfo;
 import androidx.camera.camera2.interop.Camera2Interop;
+import androidx.camera.camera2.interop.CaptureRequestOptions;
 import androidx.camera.camera2.interop.ExperimentalCamera2Interop;
 import androidx.camera.core.*;
 import androidx.camera.lifecycle.ProcessCameraProvider;
@@ -54,7 +55,7 @@ import androidx.camera.core.CameraXConfig;
 
 
 
-public class CameraManager extends SensorInterface {
+public class CameraManager2 implements SensorInterface {
 
     private ImageAnalysis.Analyzer myAnalyzer, roadAnalyzer = null;
     //public static List<CameraManager> Managers = new ArrayList<>();
@@ -90,7 +91,7 @@ public class CameraManager extends SensorInterface {
         return new CameraSelector.Builder().requireLensFacing(CameraSelector.LENS_FACING_BACK).build();
     }
 
-    public CameraManager(Context context, int cameraType){
+    public CameraManager2(Context context, int cameraType){
         msgFrameData = new MsgFrameData(cameraType);
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
         df.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -131,7 +132,7 @@ public class CameraManager extends SensorInterface {
             return;
         running = true;
 
-        CameraManager myCamManager = this;
+        CameraManager2 myCamManager = this;
         ListenableFuture<ProcessCameraProvider> cameraProviderFuture = ProcessCameraProvider.getInstance(context);
         cameraProviderFuture.addListener(new Runnable() {
             @Override
@@ -186,9 +187,10 @@ public class CameraManager extends SensorInterface {
                                     byte[] bytes = yuvBuffer.array();
                                     int total = 0, count = bytes.length / 2048;
                                     if (count > 0) {
-                                        for (int i=0; i<bytes.length; i+=2048)
+                                        for (int i=bytes.length / 2; i<bytes.length; i+=2048)
                                             total += bytes[i] & 0xFF;
                                         final int luminance = total / count;
+                                        System.out.println("Luminance: "+luminance);
                                         OnRoadScreen.CamExposure = luminance;
                                     }
                                     // try to stay around 115 and make bigger jumps if needed
@@ -274,8 +276,8 @@ public class CameraManager extends SensorInterface {
         Camera2Interop.Extender<ImageAnalysis> CameraRequests = new Camera2Interop.Extender<>(builder);
         // try to box just the road area for metering
         CameraRequests.setCaptureRequestOption(CaptureRequest.CONTROL_AE_REGIONS, new MeteringRectangle[]{
-                new MeteringRectangle((int)Math.floor(W * 0.05f), (int)Math.floor(H * 0.25f),
-                                      (int)Math.floor(W * 0.9f),  (int)Math.floor(H * 0.70f), 500)
+                new MeteringRectangle((int)Math.floor(W * 0.4f), (int)Math.floor(H * 0.5f),
+                                      (int)Math.floor(W * 0.2f),  (int)Math.floor(H * 0.2f), 1000)
         });
         float[] gammaCurve = new float[] {
                 0.0000f, 0.0000f, 0.0667f, 0.2864f, 0.1333f, 0.4007f, 0.2000f, 0.4845f,
@@ -289,7 +291,7 @@ public class CameraManager extends SensorInterface {
         CameraRequests.setCaptureRequestOption(CaptureRequest.TONEMAP_MODE, CameraMetadata.TONEMAP_MODE_CONTRAST_CURVE);
         CameraRequests.setCaptureRequestOption(CaptureRequest.TONEMAP_CURVE, curve);
         CameraRequests.setCaptureRequestOption(CaptureRequest.CONTROL_MODE, CaptureRequest.CONTROL_MODE_AUTO);
-        CameraRequests.setCaptureRequestOption(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON);
+        CameraRequests.setCaptureRequestOption(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_OFF);
         CameraRequests.setCaptureRequestOption(CaptureRequest.COLOR_CORRECTION_MODE, CaptureRequest.COLOR_CORRECTION_MODE_FAST);
         CameraRequests.setCaptureRequestOption(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, new Range<>(20, 20));
         CameraRequests.setCaptureRequestOption(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_OFF);
@@ -305,6 +307,15 @@ public class CameraManager extends SensorInterface {
         cameraControl = camera.getCameraControl();
         cameraControl.setZoomRatio(Camera.digital_zoom_apply);
         c2control = Camera2CameraControl.from(cameraControl);
+
+        c2control.setCaptureRequestOptions(
+                new CaptureRequestOptions.Builder()
+                        .setCaptureRequestOption(CaptureRequest.CONTROL_AE_REGIONS, new MeteringRectangle[]{
+                                new MeteringRectangle((int)Math.floor(W * 0.05f), (int)Math.floor(H * 0.4f),
+                                        (int)Math.floor(W * 0.9f),  (int)Math.floor(H * 0.4f), 1000)
+                        })
+                .build());
+
         c2info = Camera2CameraInfo.from(camera.getCameraInfo());
     }
 

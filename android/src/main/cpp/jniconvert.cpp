@@ -9,6 +9,7 @@
 #include <cerrno>
 #include <cstring>
 #include <map>
+#include <chrono>
 
 #include "thneedmodel.h"
 #include "clutil.h"
@@ -868,8 +869,13 @@ extern "C" {
         env->ReleaseByteArrayElements(modelData, modelDataBytes, JNI_ABORT);
     }
 
-    JNIEXPORT jfloatArray JNICALL Java_ai_flow_android_vision_THNEEDModelRunner_executeModel(JNIEnv *env, jobject obj,
-                                                               jfloatArray input) {
+    JNIEXPORT void JNICALL Java_ai_flow_android_vision_THNEEDModelRunner_executeModel(
+            JNIEnv *env,
+            jobject obj,
+            jfloatArray input,
+            jint last_frame,
+            jlong start_time
+        ) {
         // buffers
         jfloat *input_buf = env->GetFloatArrayElements(input, 0);
 
@@ -907,10 +913,14 @@ extern "C" {
         prev_curvs_buf[PREV_DESIRED_CURVS_LEN - 1] = outputs[5990];
 
         // get the outputs
-        jfloatArray result = env->NewFloatArray(output_len);
-        env->SetFloatArrayRegion(result, 0, output_len, outputs);
+        // jfloatArray result = env->NewFloatArray(output_len);
+        // env->SetFloatArrayRegion(result, 0, output_len, outputs);
 
-        return result;
+        model_publish(pm, last_frame, last_frame, last_frame, 0, 
+                  outputs, 0, end-start, true);
+        posenet_publish(pm, last_frame, 0, outputs, 0, true);
+
+        // return result;
     }
 
 } // extern "C"

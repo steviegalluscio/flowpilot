@@ -11,7 +11,7 @@ import org.capnproto.PrimitiveList;
 
 import java.util.Arrays;
 
-public class SensorManager extends SensorInterface implements Runnable{
+public class SensorManager implements SensorInterface, Runnable{
 
     public ZMQPubHandler ph;
     public String topic;

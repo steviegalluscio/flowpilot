@@ -209,7 +209,7 @@ public class CalibrateScreen extends ScreenAdapter {
                 params.put(distortionParamName, distortionCoefficientsBuffer);
 
                 // new camera matrix would be published in FrameData.
-                appContext.sensors.get(cameraName).updateProperty("intrinsics", byteToFloat(cameraMatrixBuffer));
+//                appContext.sensors.get(cameraName).updateProperty("intrinsics", byteToFloat(cameraMatrixBuffer));
             }
             else
                 System.err.println("[WARN]: Camera not calibrated.");  // TODO display in GUI.
