@@ -5,11 +5,11 @@ import android.content.Intent;
 
 import ai.flow.sensor.SensorInterface;
 
-import ai.flow.python.ServiceCalibrationd;
-import ai.flow.python.ServiceControlsd;
-import ai.flow.python.ServicePlannerd;
-import ai.flow.python.ServiceRadard;
-import ai.flow.python.ServiceFlowreset;
+import ai.flow.openpilot.ServiceCalibrationd;
+import ai.flow.openpilot.ServiceControlsd;
+import ai.flow.openpilot.ServicePlannerd;
+import ai.flow.openpilot.ServiceRadard;
+import ai.flow.openpilot.ServiceFlowreset;
 
 import ai.flow.flowy.ServiceModelparsed;
 

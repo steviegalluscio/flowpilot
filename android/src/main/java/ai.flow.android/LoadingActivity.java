@@ -2,15 +2,15 @@ package ai.flow.android;
 
 import ai.flow.R;
 import ai.flow.common.ParamsInterface;
-import ai.flow.python.ServiceCalibrationd;
-import ai.flow.python.ServiceControlsd;
-import ai.flow.python.ServiceDebugd;
-import ai.flow.python.ServiceFlowreset;
-import ai.flow.python.ServiceKeyvald;
-import ai.flow.python.ServiceLogmessaged;
-import ai.flow.python.ServicePlannerd;
-import ai.flow.python.ServiceRadard;
-import ai.flow.python.ServiceThermald;
+import ai.flow.openpilot.ServiceCalibrationd;
+import ai.flow.openpilot.ServiceControlsd;
+import ai.flow.openpilot.ServiceDebugd;
+import ai.flow.openpilot.ServiceFlowreset;
+import ai.flow.openpilot.ServiceKeyvald;
+import ai.flow.openpilot.ServiceLogmessaged;
+import ai.flow.openpilot.ServicePlannerd;
+import ai.flow.openpilot.ServiceRadard;
+import ai.flow.openpilot.ServiceThermald;
 
 import android.Manifest;
 import android.content.Intent;
