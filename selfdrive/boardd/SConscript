@@ -1,6 +1,6 @@
 Import('env', 'envCython', 'common', 'cereal', 'messaging')
 
-libs = ['usb1.0', common, cereal, messaging, 'zmq', 'capnp', 'kj']
+libs = ['usb-1.0', common, cereal, messaging, 'zmq', 'capnp', 'kj']
 env.Program('boardd', ['main.cc', 'boardd.cc', 'panda.cc', 'panda_comms.cc', 'spi.cc', 'pigeon.cc'], LIBS=libs)
 env.Program('ispanda', ['ispanda.cc'], LIBS=libs)
 env.SharedLibrary('libpandad.so', ['main.cc', 'boardd.cc', 'panda.cc', 'panda_comms.cc', 'spi.cc', 'pigeon.cc'], LIBS=libs)

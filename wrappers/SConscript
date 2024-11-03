@@ -6,3 +6,5 @@ libs = [common, cereal, 'messaging', 'thneed',
 src = ['thneedrunner.cpp']
 
 env.SharedLibrary('thneedrunner', src, LIBS=libs)
+
+env.SharedLibrary('pandaflash', 'pandaflash.cpp', LIBS=['python3.11', 'log'])

@@ -237,6 +237,7 @@ envCython["LIBS"] = ['python3.11']
 
 Export('envCython')
 
+
 # cereal and messaging are shared with the system
 SConscript(['cereal/SConscript'])
 # if SHARED:
@@ -246,6 +247,7 @@ SConscript(['cereal/SConscript'])
 
 # Export('cereal', 'messaging')
 
+SConscript(['wrappers/SConscript'])
 # # Build rednose library and ekf models
 
 rednose_deps = [
@@ -301,7 +303,6 @@ SConscript(['selfdrive/controls/lib/longitudinal_mpc_lib/SConscript'])
 # SConscript(['selfdrive/locationd/SConscript'])
 SConscript(['selfdrive/boardd/SConscript'])
 SConscript(['selfdrive/loggerd/SConscript'])
-SConscript(['thneedrunner/SConscript'])
 
 # if GetOption('test'):
 #   SConscript('panda/tests/safety/SConscript')
