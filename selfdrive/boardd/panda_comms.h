@@ -9,7 +9,7 @@
 #include <linux/spi/spidev.h>
 #endif
 
-#include <libusb-1.0/libusb.h>
+#include <libusb/libusb.h>
 
 
 #define TIMEOUT 0

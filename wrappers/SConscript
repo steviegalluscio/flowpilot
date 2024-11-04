@@ -1,10 +1,10 @@
 Import('env', 'arch', 'cereal', 'messaging', 'common')
 
 libs = [common, cereal, 'messaging', 'thneed',
-        'zmq', 'capnp', 'kj', 'z', 'modelparser', 'json11']
+        'zmq', 'capnp', 'kj', 'z', 'modelparser', 'json11', 'log']
 
 src = ['thneedrunner.cpp']
 
 env.SharedLibrary('thneedrunner', src, LIBS=libs)
 
-env.SharedLibrary('pandaflash', 'pandaflash.cpp', LIBS=['python3.11', 'log'])
+env.SharedLibrary('pandaflash', 'pandaflash.cpp', LIBS=['log', 'usb-1.0'])

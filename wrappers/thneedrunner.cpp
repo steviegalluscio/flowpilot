@@ -5,6 +5,11 @@
 #include "selfdrive/modeld/models/driving.h"
 #include "common/timing.h"
 
+#include "android/log.h"
+
+#define LOG(n, x) __android_log_write(ANDROID_LOG_INFO, (n), (x))
+#define LOGP(x) LOG("python", (x))
+
 #define MODEL_OUTPUT_SIZE 6504
 #define PREV_DESIRED_CURVS_LEN (HISTORY_BUFFER_LEN + 1)
 float zero_buf[1024/4] = {0};
@@ -36,6 +41,11 @@ void JNICALL Java_ai_flow_android_vision_THNEEDModelRunner_loadModel(JNIEnv *env
     closedir(dir);
 
     const char* path = env->GetStringUTFChars(model_path, NULL);
+    LOGP("Will call thneed->load");
+    LOGP(path);
+    if (path == NULL) {
+        LOGP("Got NULL model_path!");
+    }
     thneed->load(path);
 }
 
