@@ -261,7 +261,7 @@ bool flash_static(libusb_device_handle* handle, std::vector<uint8_t>& code, McuC
 }
 
 std::vector<uint8_t> firmware_signature(std::vector<uint8_t> &data) {
-  return std::vector<uint8_t>(data.end()-128, data.end());
+  return std::vector<uint8_t>(data.end()-0x80, data.end());
 }
 
 std::vector<uint8_t> get_signature(libusb_device_handle* handle) {
@@ -303,17 +303,16 @@ std::vector<uint8_t> get_signature(libusb_device_handle* handle) {
   return part_1;
 }
 
-void hexify(std::vector<uint8_t>& sig) {
+void hex_dump(std::vector<uint8_t>& sig) {
   static const char *hex = "0123456789abcdef";
-  char out[512];
+  char out[32+1] = {0};
   char *p = out;
   for (int i=0; i<16; ++i) {
     *p++ = hex[sig[i] >> 4];
     *p++ = hex[sig[i] & 0x0f];
   }
-  LOGI("Hex: %s,a", out);
+  LOGI("Hex: %s", out);
 }
-
 
 extern "C" {
 
@@ -326,9 +325,9 @@ jint JNICALL Java_ai_flow_flowy_PythonRunner_run(JNIEnv *env, jobject obj, jint 
   libusb_init(&ctx);
 
   open_panda(ctx, &dev_handle);
-  McuConfig config = get_mcu_config(get_mcu_type(dev_handle));
+  McuConfig mcu_config = get_mcu_config(get_mcu_type(dev_handle));
   std::string path = env->GetStringUTFChars(obj_path, NULL);
-  std::string fw_path = path + config.app_fn;
+  std::string fw_path = path + mcu_config.app_fn;
 
   std::ifstream instream(fw_path, std::ios::in | std::ios::binary);
   std::vector<uint8_t> data((std::istreambuf_iterator<char>(instream)), std::istreambuf_iterator<char>());
@@ -336,25 +335,30 @@ jint JNICALL Java_ai_flow_flowy_PythonRunner_run(JNIEnv *env, jobject obj, jint 
   std::vector<uint8_t> panda_sig = get_signature(dev_handle);
   std::vector<uint8_t> fw_sig = firmware_signature(data);
 
-  hexify(panda_sig);
-  hexify(fw_sig);
+  hex_dump(panda_sig);
+  hex_dump(fw_sig);
 
-  // reset(dev_handle, true);
+  if (panda_sig == fw_sig) {
+    LOGI("Panda is up to date");
+  } else {
+    LOGW("Panda firmware mismatch");
 
-  // libusb_close(dev_handle);
-  // dev_handle = NULL;
-  // libusb_exit(ctx);
-  // ctx = NULL;
-  // libusb_init(&ctx);
+    reset(dev_handle, true);
 
-  // open_panda(ctx, &dev_handle);
-  
-  // flash_static(dev_handle, data, config);
-  // // LOGI("FW size is %lu", data.size());
+    libusb_close(dev_handle);
+    dev_handle = NULL;
+    libusb_exit(ctx);
+    ctx = NULL;
+    libusb_init(&ctx);
 
-  // libusb_close(dev_handle);
-  // dev_handle = NULL;
-  // libusb_exit(ctx);
+    open_panda(ctx, &dev_handle);
+    
+    flash_static(dev_handle, data, mcu_config);
+  }
+
+  libusb_close(dev_handle);
+  dev_handle = NULL;
+  libusb_exit(ctx);
   return 0;
 }
 }
