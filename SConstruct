@@ -66,8 +66,8 @@ else:
   ldflags = []
 
 lenv = {
-  "PATH": "/home/fgx/.buildozer/android/platform/android-ndk-r25b/toolchains/llvm/prebuilt/linux-x86_64/bin/:/home/fgx/p4a2/venv/bin:/bin:/usr/local/bin/", #os.environ['PATH'],
-  "LD_LIBRARY_PATH": ["/home/fgx/flowy/.buildozer/android/platform/build-arm64-v8a/build/libs_collections/oscservice/arm64-v8a"],
+  "PATH": "/home/builder/.buildozer/android/platform/android-ndk-r25b/toolchains/llvm/prebuilt/linux-x86_64/bin/:/home/builder/.venv/bin:/bin:/usr/local/bin/", #os.environ['PATH'],
+  "LD_LIBRARY_PATH": [Dir("#").abspath + "/flowy/.buildozer/android/platform/build-arm64-v8a/build/libs_collections/oscservice/arm64-v8a"],
   "PYTHONPATH": Dir("#").abspath + ':' + Dir(f"#third_party/acados").abspath,
 
   "ACADOS_SOURCE_DIR": Dir("#third_party/acados").abspath,
@@ -132,7 +132,7 @@ env = Environment(
     "#third_party/acados/include/blasfeo/include",
     "#third_party/acados/include/hpipm/include",
     "#third_party/catch2/include",
-    "/home/fgx/libusb",
+    "#third_party/libusb",
     "#third_party/libyuv/include",
     "#third_party/json11",
     "#third_party/opencl/include",
@@ -149,14 +149,14 @@ env = Environment(
     "#opendbc/can",
     # "/home/fgx/openpilot/third_party",
     # "/home/fgx/flowy/.buildozer/android/platform/build-arm64-v8a/build/other_builds/capnp/arm64-v8a__ndk_target_24/capnp/c++/src/",
-    "/home/fgx/flowy/.buildozer/android/platform/build-arm64-v8a/build/other_builds/libzmq/arm64-v8a__ndk_target_24/libzmq/include/",
-    "/home/fgx/flowy/.buildozer/android/platform/build-arm64-v8a/build/other_builds/python3/arm64-v8a__ndk_target_24/python3/Include/",
-    "/home/fgx/flowy/.buildozer/android/platform/build-arm64-v8a/build/python-installs/oscservice/arm64-v8a/numpy/core/include/",
+    "#flowy/.buildozer/android/platform/build-arm64-v8a/build/other_builds/libzmq/arm64-v8a__ndk_target_24/libzmq/include/",
+    "#flowy/.buildozer/android/platform/build-arm64-v8a/build/other_builds/python3/arm64-v8a__ndk_target_24/python3/Include/",
+    "#flowy/.buildozer/android/platform/build-arm64-v8a/build/python-installs/oscservice/arm64-v8a/numpy/core/include/",
     # "/usr/local/include/capnp/",
   ],
 
-  CC='clang --target=aarch64-linux-android24 --sysroot=/home/fgx/.buildozer/android/platform/android-ndk-r25b/toolchains/llvm/prebuilt/linux-x86_64/sysroot',
-  CXX='clang++ --target=aarch64-linux-android24 --sysroot=/home/fgx/.buildozer/android/platform/android-ndk-r25b/toolchains/llvm/prebuilt/linux-x86_64/sysroot',
+  CC='clang --target=aarch64-linux-android24 --sysroot=/home/builder/.buildozer/android/platform/android-ndk-r25b/toolchains/llvm/prebuilt/linux-x86_64/sysroot',
+  CXX='clang++ --target=aarch64-linux-android24 --sysroot=/home/builder/.buildozer/android/platform/android-ndk-r25b/toolchains/llvm/prebuilt/linux-x86_64/sysroot',
   LINKFLAGS=ldflags,
   AR='llvm-ar',
   RANLIB='llvm-ranlib',
@@ -170,7 +170,7 @@ env = Environment(
     "#msgq_repo",
     "#third_party",
     "#third_party/json11",
-    "/home/fgx/libusb/android/libs/arm64-v8a",
+    "#third_party/libusb/android/libs/arm64-v8a",
     "#third_party/CL",
     "#third_party/lmdb",
     "#selfdrive/pandad",
@@ -180,9 +180,9 @@ env = Environment(
     "#rednose/helpers",
     # "/home/fgx/openpilot/cereal",
     # "/home/fgx/.buildozer/android/platform/android-ndk-r25b/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib",
-    "/home/fgx/flowy/.buildozer/android/platform/build-arm64-v8a/build/libs_collections/openpilot/arm64-v8a/",
-    "/home/fgx/flowy/.buildozer/android/platform/build-arm64-v8a/build/other_builds/python3/arm64-v8a__ndk_target_24/python3/android-build",
-    "/home/fgx/.buildozer/android/platform/android-ndk-r25b/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android/32",
+    "#flowy/.buildozer/android/platform/build-arm64-v8a/build/libs_collections/openpilot/arm64-v8a/",
+    "#flowy/.buildozer/android/platform/build-arm64-v8a/build/other_builds/python3/arm64-v8a__ndk_target_24/python3/android-build",
+    # "#.buildozer/android/platform/android-ndk-r25b/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android/32",
   ],
   CYTHONCFILESUFFIX=".cpp",
   COMPILATIONDB_USE_ABSPATH=True,
@@ -192,7 +192,7 @@ env = Environment(
 )
 
 # Cython build enviroment
-py_include = "/home/fgx/flowy/.buildozer/android/platform/build-arm64-v8a/build/other_builds/python3/arm64-v8a__ndk_target_24/python3/Include/" # sysconfig.get_paths()['include']
+py_include = "flowy/.buildozer/android/platform/build-arm64-v8a/build/other_builds/python3/arm64-v8a__ndk_target_24/python3/Include/" # sysconfig.get_paths()['include']
 envCython = env.Clone()
 envCython["CPPPATH"] += [py_include] #, np.get_include()]
 envCython["CCFLAGS"] += ["-Wno-#warnings", "-Wno-shadow", "-Wno-deprecated-declarations"]
@@ -248,37 +248,37 @@ SConscript(['cereal/SConscript'])
 SConscript(['wrappers/SConscript'])
 # # Build rednose library and ekf models
 
-rednose_deps = [
-  "#selfdrive/locationd/models/constants.py",
-  "#selfdrive/locationd/models/gnss_helpers.py",
-]
+# rednose_deps = [
+#   "#selfdrive/locationd/models/constants.py",
+#   "#selfdrive/locationd/models/gnss_helpers.py",
+# ]
 
-rednose_config = {
-  'generated_folder': '#selfdrive/locationd/models/generated',
-  'to_build': {
-    'gnss': ('#selfdrive/locationd/models/gnss_kf.py', True, [], rednose_deps),
-    'live': ('#selfdrive/locationd/models/live_kf.py', True, ['live_kf_constants.h'], rednose_deps),
-    'car': ('#selfdrive/locationd/models/car_kf.py', True, [], rednose_deps),
-  },
-}
+# rednose_config = {
+#   'generated_folder': '#selfdrive/locationd/models/generated',
+#   'to_build': {
+#     'gnss': ('#selfdrive/locationd/models/gnss_kf.py', True, [], rednose_deps),
+#     'live': ('#selfdrive/locationd/models/live_kf.py', True, ['live_kf_constants.h'], rednose_deps),
+#     'car': ('#selfdrive/locationd/models/car_kf.py', True, [], rednose_deps),
+#   },
+# }
 
-if arch != "larch64":
-  rednose_config['to_build'].update({
-    'loc_4': ('#selfdrive/locationd/models/loc_kf.py', True, [], rednose_deps),
-    'lane': ('#selfdrive/locationd/models/lane_kf.py', True, [], rednose_deps),
-    'pos_computer_4': ('#rednose/helpers/lst_sq_computer.py', False, [], []),
-    'pos_computer_5': ('#rednose/helpers/lst_sq_computer.py', False, [], []),
-    'feature_handler_5': ('#rednose/helpers/feature_handler.py', False, [], []),
-  })
+# if arch != "larch64":
+#   rednose_config['to_build'].update({
+#     'loc_4': ('#selfdrive/locationd/models/loc_kf.py', True, [], rednose_deps),
+#     'lane': ('#selfdrive/locationd/models/lane_kf.py', True, [], rednose_deps),
+#     'pos_computer_4': ('#rednose/helpers/lst_sq_computer.py', False, [], []),
+#     'pos_computer_5': ('#rednose/helpers/lst_sq_computer.py', False, [], []),
+#     'feature_handler_5': ('#rednose/helpers/feature_handler.py', False, [], []),
+#   })
 
-Export('rednose_config')
-SConscript(['rednose/SConscript'])
+# Export('rednose_config')
+# SConscript(['rednose/SConscript'])
 
 SConscript(['third_party/SConscript'])
 
-SConscript([
-  'system/clocksd/SConscript',
-])
+# SConscript([
+#   'system/clocksd/SConscript',
+# ])
 
 # build submodules
 SConscript([
@@ -288,7 +288,7 @@ SConscript([
 
 # SConscript(['SConscript'])
 
-SConscript(['system/proclogd/SConscript'])
+# SConscript(['system/proclogd/SConscript'])
 
 SConscript(['common/kalman/SConscript'])
 SConscript(['common/transformations/SConscript'])
