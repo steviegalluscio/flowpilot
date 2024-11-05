@@ -104,7 +104,7 @@ public class CameraHandler implements SensorInterface {
     public void stop(){}
 
     public void start() {
-        CameraManager manager = (CameraManager) context.getSystemService(Context.CAMERA_SERVICE);
+        android.hardware.camera2.CameraManager manager = (android.hardware.camera2.CameraManager) context.getSystemService(Context.CAMERA_SERVICE);
 
         if (manager == null) {
             throw new RuntimeException("Unable to get camera manager.");

@@ -44,6 +44,10 @@
             android:name="ai.flow.flowy.ServiceModelparsed"
             android:process=":ServiceModelparsed"
             android:stopWithTask="true"/>
+        <service
+            android:name="ai.flow.flowy.PythonRunner"
+            android:process=":PythonRunner"
+            android:stopWithTask="true"/>
     </application>
 
     <uses-permission android:name="android.permission.VIBRATE"/>

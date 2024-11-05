@@ -8,7 +8,7 @@ import ai.flow.definitions.MessageBase;
 import ai.flow.modeld.CommonModelF2;
 import ai.flow.modeld.CommonModelF3;
 import ai.flow.modeld.ParsedOutputs;
-import ai.flow.modeld.ModelOutput;
+//import ai.flow.modeld.ModelOutput;
 import org.capnproto.PrimitiveList;
 import org.capnproto.StructList;
 
@@ -500,46 +500,46 @@ public class MsgModelDataV2 extends MessageBase {
     }
     static final float[] T_IDXS = buildIdxs(10.0f, TRAJECTORY_SIZE);
     static final float[] X_IDXS = buildIdxs(192.0f, TRAJECTORY_SIZE);
-
-    public void fill(ModelOutput model, long timestamp, int frameId,
-                     int frameAge, float frameDropPerc, float modelExecutionTime,
-                     float gpuExecutionTime) {
-        modelDataV2.setFrameId(frameId);
-        modelDataV2.setFrameAge(frameAge);
-        modelDataV2.setFrameDropPerc(frameDropPerc);
-        modelDataV2.setTimestampEof(timestamp);
-        modelDataV2.setGpuExecutionTime(gpuExecutionTime); // this is actually stop sign prob
-        modelDataV2.setModelExecutionTime(modelExecutionTime);
-
-        ModelOutput.ModelOutputPlanPrediction best_plan = model.plans().prediction().stream()
-                .max(Comparator.comparing(ModelOutput.ModelOutputPlanPrediction::prob)).get();
-
-        for (int i = 0; i < CommonModelF2.TRAJECTORY_SIZE; i++) {
-            positionX.set(i, best_plan.mean().get(i).position().x());
-            positionY.set(i, best_plan.mean().get(i).position().y());
-            positionZ.set(i, best_plan.mean().get(i).position().z());
-            positionT.set(i, T_IDXS[i]);
-
-            positionXStd.set(i, (float)Math.exp(best_plan.std().get(i).position().x()));
-            positionYStd.set(i, (float)Math.exp(best_plan.std().get(i).position().y()));
-            positionZStd.set(i, (float)Math.exp(best_plan.std().get(i).position().z()));
-
-            velocityX.set(i, best_plan.mean().get(i).velocity().x());
-            velocityY.set(i, best_plan.mean().get(i).velocity().y());
-            velocityZ.set(i, best_plan.mean().get(i).velocity().z());
-            velocityT.set(i, T_IDXS[i]);
-
-            orientationX.set(i, best_plan.mean().get(i).rotation().x());
-            orientationY.set(i, best_plan.mean().get(i).rotation().y());
-            orientationZ.set(i, best_plan.mean().get(i).rotation().z());
-            orientationT.set(i, T_IDXS[i]);
-
-            orientationRateX.set(i, best_plan.mean().get(i).rotationRate().x());
-            orientationRateY.set(i, best_plan.mean().get(i).rotationRate().y());
-            orientationRateZ.set(i, best_plan.mean().get(i).rotationRate().z());
-            orientationRateT.set(i, T_IDXS[i]);
-        }
-    }
+//
+//    public void fill(ModelOutput model, long timestamp, int frameId,
+//                     int frameAge, float frameDropPerc, float modelExecutionTime,
+//                     float gpuExecutionTime) {
+//        modelDataV2.setFrameId(frameId);
+//        modelDataV2.setFrameAge(frameAge);
+//        modelDataV2.setFrameDropPerc(frameDropPerc);
+//        modelDataV2.setTimestampEof(timestamp);
+//        modelDataV2.setGpuExecutionTime(gpuExecutionTime); // this is actually stop sign prob
+//        modelDataV2.setModelExecutionTime(modelExecutionTime);
+//
+//        ModelOutput.ModelOutputPlanPrediction best_plan = model.plans().prediction().stream()
+//                .max(Comparator.comparing(ModelOutput.ModelOutputPlanPrediction::prob)).get();
+//
+//        for (int i = 0; i < CommonModelF2.TRAJECTORY_SIZE; i++) {
+//            positionX.set(i, best_plan.mean().get(i).position().x());
+//            positionY.set(i, best_plan.mean().get(i).position().y());
+//            positionZ.set(i, best_plan.mean().get(i).position().z());
+//            positionT.set(i, T_IDXS[i]);
+//
+//            positionXStd.set(i, (float)Math.exp(best_plan.std().get(i).position().x()));
+//            positionYStd.set(i, (float)Math.exp(best_plan.std().get(i).position().y()));
+//            positionZStd.set(i, (float)Math.exp(best_plan.std().get(i).position().z()));
+//
+//            velocityX.set(i, best_plan.mean().get(i).velocity().x());
+//            velocityY.set(i, best_plan.mean().get(i).velocity().y());
+//            velocityZ.set(i, best_plan.mean().get(i).velocity().z());
+//            velocityT.set(i, T_IDXS[i]);
+//
+//            orientationX.set(i, best_plan.mean().get(i).rotation().x());
+//            orientationY.set(i, best_plan.mean().get(i).rotation().y());
+//            orientationZ.set(i, best_plan.mean().get(i).rotation().z());
+//            orientationT.set(i, T_IDXS[i]);
+//
+//            orientationRateX.set(i, best_plan.mean().get(i).rotationRate().x());
+//            orientationRateY.set(i, best_plan.mean().get(i).rotationRate().y());
+//            orientationRateZ.set(i, best_plan.mean().get(i).rotationRate().z());
+//            orientationRateT.set(i, T_IDXS[i]);
+//        }
+//    }
 
     public void fill(ParsedOutputs parsed, long timestamp, int frameId,
                     int frameAge, float frameDropPerc, float modelExecutionTime,

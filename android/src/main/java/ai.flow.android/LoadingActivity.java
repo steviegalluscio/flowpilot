@@ -28,13 +28,20 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+
+import com.badlogic.gdx.Gdx;
 import com.bumptech.glide.Glide;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import ai.flow.flowy.PythonRunner;
+
 import static android.os.Build.VERSION.SDK_INT;
+
+import org.kivy.android.PythonUtil;
 
 public class LoadingActivity extends AppCompatActivity {
 
@@ -64,6 +71,11 @@ public class LoadingActivity extends AppCompatActivity {
 
         ImageView imageView = findViewById(R.id.spinner);
         Glide.with(this).load(R.drawable.spinner).into(imageView);
+
+//        System.loadLibrary("pandaflash");
+//        String app_root =  getFilesDir().getAbsolutePath() + "/app";
+//        System.out.println("Running Python");
+//        PythonRunner.run(0, app_root + "/panda/board/obj/");
 
         ensureBoot();
     }

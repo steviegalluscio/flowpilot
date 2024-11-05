@@ -18,6 +18,9 @@ import android.hardware.usb.UsbManager;
 import android.os.Bundle;
 import android.util.Log;
 
+import org.kivy.android.PythonUtil;
+
+import java.io.File;
 import java.util.HashMap;
 
 class PandaInstance implements Runnable {
@@ -39,37 +42,37 @@ public class ServicePandad extends Service {
 
 	private static final String ACTION_USB_PERMISSION = "ai.flow.flowy.USB_PERMISSION";
     private BroadcastReceiver usbReceiver = new BroadcastReceiver() {
-            public void onReceive(Context context, Intent intent) {
-                String action = intent.getAction();
-                System.out.println("RECEIVING INTENT: " + action);
+        public void onReceive(Context context, Intent intent) {
+        String action = intent.getAction();
+        System.out.println("RECEIVING INTENT: " + action);
 
-                if (UsbManager.ACTION_USB_DEVICE_ATTACHED.equals(action)) {
-                    synchronized (this) {
-                        UsbDevice device = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
-                        if (device == null) { return; }
-                        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, new Intent(ACTION_USB_PERMISSION), PendingIntent.FLAG_MUTABLE);
-                        ((UsbManager)context.getSystemService(Context.USB_SERVICE)).requestPermission(device, pendingIntent);
-                    }
-                } else if (ACTION_USB_PERMISSION.equals(action)) {
-                    synchronized (this) {
-                        UsbDevice device = (UsbDevice)intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
-                        if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
-                            if(device != null) {
-                                UsbManager usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
-                                UsbDeviceConnection usbDeviceConnection = usbManager.openDevice(device);
-                                Log.i(TAG, "Permission granted for serial "+usbDeviceConnection.getSerial());
-                                // nativeStart(usbDeviceConnection.getFileDescriptor());
-                                PandaInstance pandaInstance = new PandaInstance(usbDeviceConnection.getFileDescriptor());
-                                new Thread(pandaInstance).start();
-                            }
-                        }
-                        else {
-                            Log.i(TAG, "Permission denied for device " + device);
-                        }
+        if (UsbManager.ACTION_USB_DEVICE_ATTACHED.equals(action)) {
+            synchronized (this) {
+                UsbDevice device = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
+                if (device == null) { return; }
+                PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, new Intent(ACTION_USB_PERMISSION), PendingIntent.FLAG_MUTABLE);
+                ((UsbManager)context.getSystemService(Context.USB_SERVICE)).requestPermission(device, pendingIntent);
+            }
+        } else if (ACTION_USB_PERMISSION.equals(action)) {
+            synchronized (this) {
+                UsbDevice device = (UsbDevice)intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
+                if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
+                    if(device != null) {
+                        UsbManager usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
+                        UsbDeviceConnection usbDeviceConnection = usbManager.openDevice(device);
+                        Log.i(TAG, "Permission granted for serial "+usbDeviceConnection.getSerial());
+                        // nativeStart(usbDeviceConnection.getFileDescriptor());
+                        PandaInstance pandaInstance = new PandaInstance(usbDeviceConnection.getFileDescriptor());
+                        new Thread(pandaInstance).start();
                     }
                 }
+                else {
+                    Log.i(TAG, "Permission denied for device " + device);
+                }
             }
-        };
+        }
+        }
+    };
 
     public int startType() {
         return START_NOT_STICKY;

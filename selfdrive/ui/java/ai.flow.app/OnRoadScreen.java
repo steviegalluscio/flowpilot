@@ -587,7 +587,6 @@ public class OnRoadScreen extends ScreenAdapter {
 //        Definitions.LateralPlan.Reader latPlan = sh.recv("lateralPlan").getLateralPlan();
 //        PrimitiveList.Float.Reader pathpoints = latPlan.getDPathPoints();
         MsgModelDataV2.fillParsed(parsed, event.getModelV2(), true);
-        System.out.println("LLPL2: " + parsed.laneLineProbs[0]);
 
         Matrix4 Rt = new Matrix4().setFromEulerAnglesRad(-augmentRot.y, -augmentRot.z, -augmentRot.x);
         Matrix4 RtPath = new Matrix4().setFromEulerAnglesRad(-augmentRot.y, -augmentRot.z, -augmentRot.x).translate(0f, 1.28f, 0f);

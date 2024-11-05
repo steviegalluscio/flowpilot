@@ -1,10 +1,9 @@
 package ai.flow.android;
 
 import ai.flow.android.sensor.CameraHandler;
-import ai.flow.android.sensor.CameraManager2;
-import ai.flow.android.sensor.SensorManager;
 //import ai.flow.android.vision.ONNXModelRunner;
 //import ai.flow.android.vision.SNPEModelRunner;
+import ai.flow.android.sensor.CameraManager;
 import ai.flow.android.vision.THNEEDModelRunner;
 import ai.flow.app.FlowUI;
 import ai.flow.common.ParamsInterface;
@@ -42,9 +41,6 @@ import java.util.*;
 
 import ai.flow.android.sensor.PandaManager;
 import ai.flow.android.sensor.OnroadManager;
-import ai.flow.android.sensor.ModelparsedManager;
-
-
 
 
 /** Launches the main android flowpilot application. */
@@ -101,18 +97,19 @@ public class AndroidLauncher extends FragmentActivity implements AndroidFragment
 
 		AndroidApplicationConfiguration configuration = new AndroidApplicationConfiguration();
 //		SensorManager sensorManager = new SensorManager(appContext, 20);
-		CameraHandler cameraHandler = new CameraHandler(getApplication().getApplicationContext());
+		CameraHandler cameraManager = new CameraHandler(getApplication().getApplicationContext());
+//		CameraManager cameraManager = new CameraManager(getApplication().getApplicationContext(), utils.F2 || Camera.FORCE_TELE_CAM_F3 ? Camera.CAMERA_TYPE_ROAD : Camera.CAMERA_TYPE_WIDE);
 
 		PandaManager pandaManager = new PandaManager(getApplication().getApplicationContext());
 		OnroadManager onroadManager = new OnroadManager(getApplication().getApplicationContext());
-		ModelparsedManager modelparsedManager = new ModelparsedManager(getApplication().getApplicationContext());
+//		ModelparsedManager modelparsedManager = new ModelparsedManager(getApplication().getApplicationContext());
 		managers = new HashMap<String, SensorInterface>() {{
 			put("panda", pandaManager);
 			put("onroad", onroadManager);
-			put("modelparsed", modelparsedManager);
+//			put("modelparsed", modelparsedManager);
 		}};
 		sensors = new HashMap<String, SensorInterface>() {{
-			put("roadCamera", cameraHandler);
+			put("roadCamera", cameraManager);
 //			put("motionSensors", sensorManager);
 		}};
 
@@ -172,7 +169,6 @@ public class AndroidLauncher extends FragmentActivity implements AndroidFragment
 
 		MainFragment fragment = new MainFragment(new FlowUI(launcher, androidHardwareManager, pid));
 //		cameraManager.setLifeCycleFragment(fragment);
-//		if (cameraManagerWide != null) cameraManagerWide.setLifeCycleFragment(fragment);
 		FragmentTransaction trans = getSupportFragmentManager().beginTransaction();
 		trans.replace(android.R.id.content, fragment);
 		trans.commit();

@@ -74,7 +74,6 @@ public class THNEEDModelRunner extends ModelRunner {
         inputMap.get("big_input_imgs").data().asNioFloat().get(inputBuffer, img_len , img_len);
         inputMap.get("desire").data().asNioFloat().get(inputBuffer, img_len * 2, desire_len);
         executeAndPublish(inputBuffer, lastFrame);
-//        System.arraycopy(netOutputs, 0, outputMap.get("outputs"), 0, outputMap.get("outputs").length);
     }
 
     @Override

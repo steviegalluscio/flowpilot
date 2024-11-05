@@ -51,7 +51,6 @@ public class Launcher {
         startSensorD();
         initModelD();
         this.managers.get("panda").start();
-        this.managers.get("modelparsed").start();
     }
 
     public void main(String[] args) {

@@ -11,8 +11,6 @@ import ai.flow.openpilot.ServicePlannerd;
 import ai.flow.openpilot.ServiceRadard;
 import ai.flow.openpilot.ServiceFlowreset;
 
-import ai.flow.flowy.ServiceModelparsed;
-
 public class OnroadManager implements SensorInterface {
     private Context ctx;
 
@@ -27,10 +25,10 @@ public class OnroadManager implements SensorInterface {
 
     public void start() {
         System.out.println("Onroad was called, starting services!");
-//        ServiceModelparsed.start(this.ctx);
     }
 
     public void stop() {
+        // Actually, restart, as they spinloop waiting for CarParams
         ServiceFlowreset.start(this.ctx, "");
         this.ctx.stopService(new Intent(this.ctx, ServiceControlsd.class));
         this.ctx.stopService(new Intent(this.ctx, ServiceRadard.class));
