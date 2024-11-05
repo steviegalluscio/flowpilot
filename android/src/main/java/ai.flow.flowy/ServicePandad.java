@@ -95,6 +95,12 @@ public class ServicePandad extends Service {
             return startType();
         }
 
+        // Flash Panda
+        System.loadLibrary("pandaflash");
+        String app_root =  getFilesDir().getAbsolutePath() + "/app";
+        System.out.println("Flashing Panda");
+        PythonRunner.run(0, app_root + "/panda/board/obj/");
+
         // Request permission for newly plugged devices
         IntentFilter attachFilter = new IntentFilter();
         attachFilter.addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED);

@@ -72,11 +72,6 @@ public class LoadingActivity extends AppCompatActivity {
         ImageView imageView = findViewById(R.id.spinner);
         Glide.with(this).load(R.drawable.spinner).into(imageView);
 
-//        System.loadLibrary("pandaflash");
-//        String app_root =  getFilesDir().getAbsolutePath() + "/app";
-//        System.out.println("Running Python");
-//        PythonRunner.run(0, app_root + "/panda/board/obj/");
-
         ensureBoot();
     }
 
