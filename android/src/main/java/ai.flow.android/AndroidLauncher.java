@@ -35,7 +35,6 @@ import com.badlogic.gdx.backends.android.AndroidFragmentApplication;
 
 import org.acra.ACRA;
 import org.acra.ErrorReporter;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
@@ -182,7 +181,7 @@ public class AndroidLauncher extends FragmentActivity implements AndroidFragment
 		}
 
 		@Override
-		public View onCreateView(@NotNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 			return initializeForView(flowUI);
 		}
 	}
