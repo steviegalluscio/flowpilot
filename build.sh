@@ -32,4 +32,4 @@ cp flowy/bin/openpilot-0.1-arm64-v8a-debug.aar android/libs
 # libusb, libpandad, libzmq ..
 
 # Gradle
-ANDROID_HOME=/home/builder/.buildozer/android/platform/android-sdk ./gradlew assembleDebug
+ANDROID_HOME=/home/builder/.buildozer/android/platform/android-sdk ./gradlew assembleRelease
