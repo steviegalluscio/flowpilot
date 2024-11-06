@@ -29,7 +29,11 @@ cd -
 cp flowy/bin/openpilot-0.1-arm64-v8a-debug.aar android/libs
 
 # Move libs
-# libusb, libpandad, libzmq ..
+cp third_party/libusb/android/libs/arm64-v8a/libusb-1.0.so android/libs/arm64-v8a
+cp wrappers/libpandaflash.so android/libs/arm64-v8a
+cp wrappers/libthneedrunner.so android/libs/arm64-v8a
+
+# TODO: Move panda assets
 
 # Gradle
 ANDROID_HOME=/home/builder/.buildozer/android/platform/android-sdk ./gradlew assembleRelease
