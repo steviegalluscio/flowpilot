@@ -22,3 +22,9 @@ jobs:
       with:
         name: android-release.apk
         path: android/build/outputs/apk/release/android-release.apk
+
+    - name: Archive libs
+      uses: actions/upload-artifact@v4
+      with:
+        name: libs
+        path: flowpilot/android/libs
