@@ -1,4 +1,12 @@
-# Read this FAQ before anything else: https://github.com/phr00t/flowpilot/wiki/FlowPilot:-FAQ
+# Flowpilot stand alone
+This is a fork of Flowpilot without the need of rooting or a Termux environment. Install the apk and you're done. Requires a Snapdragon based Android phone.
+
+Main features of this fork:
+* Standalone apk without additional software requirements
+* Android device rooting is not required
+* Improved UI resolution
+
+Huge shout out to the original [Flowpilot](https://github.com/flowdriveai/flowpilot) and [Phr00t's fork](https://github.com/phr00t/flowpilot).
 
 # Community
 
@@ -7,12 +15,6 @@
 Flowpilot's core community lives on the official flowdrive [discord server](https://discord.com/invite/APJaQR9nhz). Check the pinned messages or search history through messages to see if your issues or question has been discussed earlier. You may also join [more awesome](https://linktr.ee/flowdrive) openpilot discord communities. 
 
 We also push frequent updates on our [twitter handle](https://twitter.com/flowdrive_ai).
-
-# User Data 
-
-Flowpilot will require your email address for setting up you flowdrive account. Flowpilot logs the road-facing cameras, CAN, GPS, IMU, magnetometer, thermal sensors, crashes, and operating system logs. The driver-facing camera is only logged if you explicitly opt-in in settings. The microphone is not recorded.
-
-You understand that use of this software or its related services will generate certain types of user data, which may be logged and stored at the sole discretion of flowdrive. By accepting this agreement, you grant an irrevocable, perpetual, worldwide right to flowdrive for the use of this data.
 
 # Disclaimer 
 
