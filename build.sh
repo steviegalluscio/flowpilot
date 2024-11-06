@@ -1,5 +1,13 @@
 #!/bin/bash
 
+# Instructions:
+# Build docker container, once:
+# $ docker build -t builder docker/
+# Create cache dir, once:
+# $ mkdir cache/buildozer cache/gradle
+# Then build, as many times as you please:
+# $ docker run --rm -it -v ./:/work -v ./cache/buildozer:/home/builder/.buildozer -v ./cache/gradle:/home/builder/.gradle -w /work builder ./build.sh
+
 source ~/.venv/bin/activate
 
 # python-for-android, first run to generate a python envirnoment scons can link against
