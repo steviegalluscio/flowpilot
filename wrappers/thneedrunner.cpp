@@ -7,8 +7,11 @@
 
 #include "android/log.h"
 
-#define LOG(n, x) __android_log_write(ANDROID_LOG_INFO, (n), (x))
-#define LOGP(x) LOG("python", (x))
+#define  LOG_TAG    "thneedrunner"
+#define  LOGE(...)  __android_log_print(ANDROID_LOG_ERROR,LOG_TAG,__VA_ARGS__)
+#define  LOGW(...)  __android_log_print(ANDROID_LOG_WARN,LOG_TAG,__VA_ARGS__)
+#define  LOGD(...)  __android_log_print(ANDROID_LOG_DEBUG,LOG_TAG,__VA_ARGS__)
+#define  LOGI(...)  __android_log_print(ANDROID_LOG_INFO,LOG_TAG,__VA_ARGS__)
 
 #define MODEL_OUTPUT_SIZE 6504
 #define PREV_DESIRED_CURVS_LEN (HISTORY_BUFFER_LEN + 1)
@@ -22,30 +25,13 @@ bool record;
 extern "C" {
 
 void JNICALL Java_ai_flow_android_vision_THNEEDModelRunner_loadModel(JNIEnv *env, jobject obj, jstring model_path) {    
-    DIR* dir = opendir("/proc/self/fd");
-    struct dirent* entry;
-    while ((entry = readdir(dir)) != NULL) {
-        std::string fdPath = std::string("/proc/self/fd/") + entry->d_name;
-        char linkTarget[256];
-        ssize_t len = readlink(fdPath.c_str(), linkTarget, sizeof(linkTarget)-1);
-        if (len != -1) {
-            linkTarget[len] = '\0';
-            if (std::string(linkTarget) == "/dev/kgsl-3d0") {
-                // Hack to set g_fd
-                ioctl(std::stoi(entry->d_name), IOCTL_KGSL_GPUOBJ_ALLOC, NULL);
-                thneed = new Thneed(true, NULL);
-                break;
-            }
-        }
-    }
-    closedir(dir);
+    // Hack to point to kgsl
+    int fd = open("/dev/kgsl-3d0", O_RDWR, 0);
+    ioctl(fd, IOCTL_KGSL_GPUOBJ_ALLOC, NULL);
+    // End hack
+    thneed = new Thneed(true, NULL);
 
     const char* path = env->GetStringUTFChars(model_path, NULL);
-    LOGP("Will call thneed->load");
-    LOGP(path);
-    if (path == NULL) {
-        LOGP("Got NULL model_path!");
-    }
     thneed->load(path);
 }
 
