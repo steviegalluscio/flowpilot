@@ -16,6 +16,8 @@ cd -
 # For Android (arm64)
 # libusb
 ~/.buildozer/android/platform/android-ndk-r25b/ndk-build -C third_party/libusb/android/jni USE_PC_NAME=1
+# libjson11
+~/.buildozer/android/platform/android-ndk-r25b/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android30-clang++ -shared third_party/json11/json11.cpp -fPIC -O3 -o android/libs/arm64-v8a/libjson11.so
 
 # Build openpilot
 scons .

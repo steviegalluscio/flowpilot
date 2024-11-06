@@ -15,3 +15,6 @@
 [submodule "third_party/capnproto-java"]
 	path = third_party/capnproto-java
 	url = https://github.com/capnproto/capnproto-java.git
+[submodule "third_party/json11"]
+	path = third_party/json11
+	url = https://github.com/dropbox/json11.git
