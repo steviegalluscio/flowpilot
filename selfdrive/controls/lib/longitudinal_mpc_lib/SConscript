@@ -55,16 +55,16 @@ acados_templates_dir = '#third_party/acados/acados_template/c_templates_tera'
 
 source_list = ['long_mpc.py',
   f'{acados_dir}/include/acados_c/ocp_nlp_interface.h',
-  f'{acados_dir}/{arch}/lib/libacados.so',
+  # f'{acados_dir}/{arch}/lib/libacados.so',
   f'{acados_templates_dir}/acados_solver.in.c',
 ]
 
 lenv = env.Clone()
-# lenv.Clean(generated_files, Dir(gen))
+lenv.Clean(generated_files, Dir(gen))
 
-# lenv.Command(generated_files,
-#              source_list,
-#              f"cd {Dir('.').abspath} && python3 long_mpc.py")
+lenv.Command(generated_files,
+             source_list,
+             f"cd {Dir('.').abspath} && python3 long_mpc.py")
 
 lenv["CFLAGS"].append("-DACADOS_WITH_QPOASES")
 lenv["CXXFLAGS"].append("-DACADOS_WITH_QPOASES")
@@ -90,5 +90,5 @@ lenv2.Command(libacados_ocp_solver_c,
   f' -I {libacados_ocp_solver_pxd.get_dir().get_labspath()}' + \
   f' -I {acados_ocp_solver_common.get_dir().get_labspath()}' + \
   f' {acados_ocp_solver_pyx.get_labspath()}')
-lib_cython = lenv2.Program(f'{gen}/acados_ocp_solver_pyx.so', [libacados_ocp_solver_c], LIBS=lenv2["LIBS"]+['acados_ocp_solver_long', 'c++'])
+lib_cython = lenv2.Program(f'{gen}/acados_ocp_solver_pyx.so', [libacados_ocp_solver_c], LIBS=lenv2["LIBS"]+[lib_solver, 'acados'])
 lenv2.Depends(lib_cython, lib_solver)

@@ -1,6 +1,6 @@
-Import('env', 'arch', 'cereal', 'messaging', 'common')
+Import('env', 'arch', 'cereal', 'messaging', 'common', 'thneed', 'modelparser')
 
-libs = [common, cereal, 'messaging', 'thneed',
+libs = [common, 'cereal', 'messaging', 'thneed',
         'zmq', 'capnp', 'kj', 'z', 'modelparser', 'json11', 'log']
 
 src = ['thneedrunner.cpp']

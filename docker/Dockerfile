@@ -8,4 +8,4 @@ WORKDIR /home/builder
 RUN python3 -m venv ~/.venv
 RUN ~/.venv/bin/pip install buildozer setuptools cython
 RUN ~/.venv/bin/pip install scons numpy pycryptodome pycapnp
-RUN ~/.venv/bin/pip install pyyaml certifi hatanaka
+RUN ~/.venv/bin/pip install pyyaml certifi hatanaka casadi future-fstrings

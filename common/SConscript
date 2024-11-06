@@ -9,7 +9,7 @@ common_libs = [
   'ratekeeper.cc'
 ]
 
-_common = env.Library('common/libcommon.so', common_libs, LIBS=["json11", "lmdb"])
+_common = env.Library('common/libcommon.so', common_libs, LIBS=["json11", "lmdb", "zmq"])
 
 Export('_common')
 

@@ -97,7 +97,7 @@ elif GetOption('ubsan'):
   ldflags = ["-fsanitize=undefined"]
 else:
   ccflags = []
-  ldflags = ['-llog']
+  ldflags = ['-llog', '-Wl,--no-undefined']
 
 # Enable swaglog include in submodules
 cflags += ['-DSWAGLOG="\\"common/swaglog.h\\""']
@@ -128,10 +128,11 @@ env = Environment(
 
   CPPPATH=cpppath + [
     "#",
-    "#third_party/acados/include",
-    "#third_party/acados/include/blasfeo/include",
-    "#third_party/acados/include/hpipm/include",
-    "#third_party/catch2/include",
+    "#flowy/.buildozer/android/platform/build-arm64-v8a/build/other_builds/acados/arm64-v8a__ndk_target_24/acados",
+    "#flowy/.buildozer/android/platform/build-arm64-v8a/build/other_builds/acados/arm64-v8a__ndk_target_24/acados/external/blasfeo/include",
+    "#flowy/.buildozer/android/platform/build-arm64-v8a/build/other_builds/acados/arm64-v8a__ndk_target_24/acados/external/hpipm/include",
+    "#flowy/.buildozer/android/platform/build-arm64-v8a/build/other_builds/acados/arm64-v8a__ndk_target_24/acados/external",
+    "#flowy/.buildozer/android/platform/build-arm64-v8a/build/other_builds/acados/arm64-v8a__ndk_target_24/acados/interfaces",
     "#third_party/libusb",
     "#third_party/libyuv/include",
     "#third_party/json11",
@@ -148,7 +149,7 @@ env = Environment(
     "#msgq",
     "#opendbc/can",
     # "/home/fgx/openpilot/third_party",
-    # "/home/fgx/flowy/.buildozer/android/platform/build-arm64-v8a/build/other_builds/capnp/arm64-v8a__ndk_target_24/capnp/c++/src/",
+    "#flowy/.buildozer/android/platform/build-arm64-v8a/build/other_builds/capnp/arm64-v8a__ndk_target_24/capnp/c++/src/",
     "#flowy/.buildozer/android/platform/build-arm64-v8a/build/other_builds/libzmq/arm64-v8a__ndk_target_24/libzmq/include/",
     "#flowy/.buildozer/android/platform/build-arm64-v8a/build/other_builds/python3/arm64-v8a__ndk_target_24/python3/Include/",
     "#flowy/.buildozer/android/platform/build-arm64-v8a/build/python-installs/oscservice/arm64-v8a/numpy/core/include/",
@@ -245,7 +246,6 @@ SConscript(['cereal/SConscript'])
 
 # Export('cereal', 'messaging')
 
-SConscript(['wrappers/SConscript'])
 # # Build rednose library and ekf models
 
 # rednose_deps = [
@@ -294,6 +294,7 @@ SConscript(['common/kalman/SConscript'])
 SConscript(['common/transformations/SConscript'])
 
 SConscript(['selfdrive/modeld/SConscript'])
+SConscript(['wrappers/SConscript'])
 
 SConscript(['selfdrive/controls/lib/lateral_mpc_lib/SConscript'])
 SConscript(['selfdrive/controls/lib/longitudinal_mpc_lib/SConscript'])
