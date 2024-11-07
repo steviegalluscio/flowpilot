@@ -2,6 +2,11 @@
 
 source ~/.venv/bin/activate
 
+# The first build will be slow as we're building a Python environment
+if [ ! -d "flowy/.buildozer" ]; then
+  build_flowy
+fi
+
 # Function to build flowy
 build_flowy() {
   echo "Building flowy..."
@@ -48,10 +53,7 @@ build_app() {
 # Function to build everything
 build_full() {
   echo "Building everything..."
-  
-  if [ ! -d "flowy/.buildozer" ]; then
-    build_flowy
-  fi
+
   build_scons
   build_flowy
   build_app

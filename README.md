@@ -9,20 +9,24 @@ Main features of this fork:
 Huge shout out to the original [Flowpilot](https://github.com/flowdriveai/flowpilot) and [Phr00t's fork](https://github.com/phr00t/flowpilot).
 
 # Building notes
+Clone:
+* `git clone --single-branch --depth 1 git@github.com:jagheterfredrik/flowpilot.git`
+* `git submodule update --init --recursive`
+
 Setup the environment once:
-* Install Docker
-* $ ./build_env.sh
+* Install Docker with [non-root management](https://docs.docker.com/engine/install/linux-postinstall/)
+* `./build_env.sh`
 
 Then build using
-* $ ./build.sh full
+* `./build.sh full`
 
 One can also build only subcomponents:
 * To package the Python code:
-  * $ ./build.sh flowy
+  * `./build.sh flowy`
 * To build only binary requirements:
-  * $ ./build.sh scons
+  * `./build.sh scons`
 * To package the Android app:
-  * $ ./build.sh app
+  * `./build.sh app`
 
 # Community
 
