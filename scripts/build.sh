@@ -2,16 +2,11 @@
 
 source ~/.venv/bin/activate
 
-# The first build will be slow as we're building a Python environment
-if [ ! -d "flowy/.buildozer" ]; then
-  build_flowy
-fi
-
 # Function to build flowy
 build_flowy() {
   echo "Building flowy..."
   cd flowy
-  buildozer android debug
+  CI=1 buildozer android debug
   cd -
 
   cp flowy/bin/openpilot-0.1-arm64-v8a-debug.aar android/libs
@@ -62,6 +57,11 @@ build_full() {
 run() {
   "$@"
 }
+
+# The first build will be slow as we're building a Python environment
+if [ ! -d "flowy/.buildozer" ]; then
+  build_flowy
+fi
 
 build_target="$1"
 shift
