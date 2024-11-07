@@ -15,7 +15,7 @@ jobs:
 
     - name: Build apk
       run: |
-        ./.github/workflows/build-ci.sh
+        docker run -v ./:/work -w /work builder ./scripts/build.sh full
 
     - name: Archive apk
       uses: actions/upload-artifact@v4

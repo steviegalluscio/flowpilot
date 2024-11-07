@@ -8,6 +8,22 @@ Main features of this fork:
 
 Huge shout out to the original [Flowpilot](https://github.com/flowdriveai/flowpilot) and [Phr00t's fork](https://github.com/phr00t/flowpilot).
 
+# Building notes
+Setup the environment once:
+* Install Docker
+* $ ./build_env.sh
+
+Then build using
+* $ ./build.sh full
+
+One can also build only subcomponents:
+* To package the Python code:
+  * $ ./build.sh flowy
+* To build only binary requirements:
+  * $ ./build.sh scons
+* To package the Android app:
+  * $ ./build.sh app
+
 # Community
 
 [<img src="https://assets-global.website-files.com/6257adef93867e50d84d30e2/636e0b5061df29d55a92d945_full_logo_blurple_RGB.svg" width="200">](https://discord.com/invite/APJaQR9nhz)
