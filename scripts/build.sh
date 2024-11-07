@@ -35,7 +35,6 @@ build_scons() {
   cp wrappers/libthneedrunner.so android/libs/arm64-v8a
   cp cereal/libmessaging.so android/libs/arm64-v8a
   cp selfdrive/modeld/libmodelparser.so android/libs/arm64-v8a
-  cp selfdrive/modeld/libthneed.so android/libs/arm64-v8a
   cp selfdrive/boardd/libpandad.so android/libs/arm64-v8a
 }
 

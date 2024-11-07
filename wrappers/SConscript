@@ -1,9 +1,9 @@
-Import('env', 'arch', 'cereal', 'messaging', 'common', 'thneed', 'modelparser')
+Import('env', 'arch', 'cereal', 'messaging', 'common', 'modelparser')
 
-libs = [common, 'cereal', 'messaging', 'thneed',
+libs = [common, 'cereal', 'messaging',
         'zmq', 'capnp', 'kj', 'z', 'modelparser', 'json11', 'log']
 
-src = ['thneedrunner.cpp']
+src = ['jniconvert.cpp']
 
 env.SharedLibrary('thneedrunner', src, LIBS=libs)
 
