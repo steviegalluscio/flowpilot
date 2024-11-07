@@ -48,8 +48,8 @@ public class LoadingActivity extends AppCompatActivity {
     List<String> requiredPermissions = Arrays.asList(Manifest.permission.CAMERA,
             //Manifest.permission.WRITE_EXTERNAL_STORAGE, // unused on android 13+
             //Manifest.permission.READ_EXTERNAL_STORAGE, // unused on android 13+
-            Manifest.permission.RECORD_AUDIO,
-            Manifest.permission.READ_PHONE_STATE,
+//            Manifest.permission.RECORD_AUDIO,
+//            Manifest.permission.READ_PHONE_STATE,
             Manifest.permission.WAKE_LOCK,
             Manifest.permission.VIBRATE);
 
@@ -81,10 +81,6 @@ public class LoadingActivity extends AppCompatActivity {
                 return false;
             }
         }
-
-        // External storage access permissions for android 12 and above.
-        if (SDK_INT >= Build.VERSION_CODES.R)
-            return Environment.isExternalStorageManager();
         return true;
     }
 
@@ -157,23 +153,6 @@ public class LoadingActivity extends AppCompatActivity {
         }
         if (!requestPermissions.isEmpty())
             ActivityCompat.requestPermissions(this, requestPermissions.toArray(new String[0]), 1);
-
-        // External storage access permissions for android 12 and above.
-        if (SDK_INT >= Build.VERSION_CODES.R) {
-            if (Environment.isExternalStorageManager())
-                return;
-            try {
-                Toast.makeText(this, "grant external storage access to flowpilot.", Toast.LENGTH_LONG).show();
-                Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
-                intent.addCategory("android.intent.category.DEFAULT");
-                intent.setData(Uri.parse(String.format("package:%s",getApplicationContext().getPackageName())));
-                startActivityForResult(intent, 6969);
-            } catch (Exception e) {
-                Intent intent = new Intent();
-                intent.setAction(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
-                startActivityForResult(intent, 6969);
-            }
-        }
     }
 
     @Override
