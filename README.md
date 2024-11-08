@@ -10,7 +10,8 @@ Huge shout out to the original [Flowpilot](https://github.com/flowdriveai/flowpi
 
 # Building notes
 Clone:
-* `git clone --single-branch --depth 1 git@github.com:jagheterfredrik/flowpilot.git`
+* `git clone --single-branch --depth 1 https://github.com/jagheterfredrik/flowpilot.git`
+* `cd flowpilot`
 * `git submodule update --init --recursive`
 
 Setup the environment once:
