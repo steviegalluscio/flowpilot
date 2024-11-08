@@ -5,7 +5,7 @@ RUN apt update && apt install -y capnproto pkg-config m4 libtool automake autoco
 ARG USER_ID=1337
 ARG GROUP_ID=1337
 
-RUN groupadd -g $GROUP_ID builder && useradd -m -u $USER_ID -g $GROUP_ID builder && adduser builder sudo && echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+RUN groupadd -f -g $GROUP_ID builder && useradd -m -u $USER_ID -g $GROUP_ID builder && adduser builder sudo && echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
 COPY capnproto-java /capnproto-java
 WORKDIR /capnproto-java
