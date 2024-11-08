@@ -11,11 +11,11 @@ jobs:
 
     - name: Build Docker image
       run: |
-        docker build -t builder docker/
+        ./build_env.sh
 
     - name: Build apk
       run: |
-        docker run -v ./:/work -w /work builder ./scripts/build.sh full
+        ./build.sh full
 
     - name: Archive apk
       uses: actions/upload-artifact@v4
