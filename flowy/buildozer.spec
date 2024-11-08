@@ -96,7 +96,7 @@ fullscreen = 0
 android.permissions = INTERNET,android.permission.ACCESS_NETWORK_STATE
 
 # (int) Android API to use
-android.api = 35
+android.api = 31
 
 # (int) Minimum API required. You will need to set the android.ndk.api to be as low as this value.
 android.minapi = 24
