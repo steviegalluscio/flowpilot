@@ -84,7 +84,7 @@ class Controls:
 
     self.sm = sm
     if self.sm is None:
-      ignore = ['driverCameraState', 'testJoystick', 'driverMonitoringState', 'radarState'] if SIMULATION else ['driverCameraState', 'testJoystick', 'driverMonitoringState']
+      ignore = ['driverCameraState', 'testJoystick', 'driverMonitoringState', 'radarState'] if SIMULATION else ['driverCameraState', 'testJoystick', 'driverMonitoringState', 'managerState']
 
       if NOSENSOR:
         ignore += ['liveParameters', 'liveTorqueParameters', 'liveLocationKalman']
@@ -206,8 +206,8 @@ class Controls:
       self.events.add(EventName.joystickDebug, static=True)
       self.startup_event = None
 
-    # controlsd is driven by can recv, expected at 100Hz
-    self.rk = Ratekeeper(100, print_delay_threshold=None)
+    # controlsd is driven by can recv, expected at 50Hz
+    self.rk = Ratekeeper(50, print_delay_threshold=None)
     self.prof = Profiler(False)  # off by default
 
   def set_initial_state(self):
