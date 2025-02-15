@@ -83,7 +83,7 @@ McuConfig get_mcu_config(McuType mcu_type) {
   return F4Config;
 }
 
-void open_panda(libusb_context* ctx, libusb_device_handle** dev_handle) {  
+void open_panda(libusb_context* ctx, libusb_device_handle** dev_handle) {
   ssize_t num_devices;
   libusb_device** dev_list = NULL;
 
@@ -92,7 +92,10 @@ void open_panda(libusb_context* ctx, libusb_device_handle** dev_handle) {
     for (size_t i = 0; i < num_devices; ++i) {
       libusb_device_descriptor desc;
       libusb_get_device_descriptor(dev_list[i], &desc);
-      if (desc.idVendor == 0xbbaa && (desc.idProduct == 0xddcc || desc.idProduct == 0xddee)) {
+
+      // Check for both panda vendor IDs and product IDs
+      if ((desc.idVendor == 0xbbaa || desc.idVendor == 0x3801) &&
+          (desc.idProduct == 0xddcc || desc.idProduct == 0xddee)) {
         int ret = 0;
         ret = libusb_open(dev_list[i], dev_handle);
         if(ret == 0) {
@@ -117,10 +120,10 @@ McuType get_mcu_type(libusb_device_handle *dev_handle) {
       0x40, // Length of data buffer
       0 // Timeout in milliseconds
   );
-  if (r < 0) {  
+  if (r < 0) {
     return McuType::UNKNOWN;
   }
-  if (hw_type[0] == 0x01 || hw_type[0] == 0x02 || hw_type[0] == 0x03) { 
+  if (hw_type[0] == 0x01 || hw_type[0] == 0x02 || hw_type[0] == 0x03) {
     return McuType::F4;
   } else if (hw_type[0] == 0x07 || hw_type[0] == 0x08) {
     return McuType::H7;
@@ -352,7 +355,7 @@ jint JNICALL Java_ai_flow_flowy_PythonRunner_run(JNIEnv *env, jobject obj, jint 
     libusb_init(&ctx);
 
     open_panda(ctx, &dev_handle);
-    
+
     flash_static(dev_handle, data, mcu_config);
   }
 
