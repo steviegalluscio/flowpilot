@@ -67,11 +67,14 @@ public class ServicePandad extends Service {
             Log.w(TAG, "maybeRequestUSBPermission got a null device");
             return;
         }
-        if (device.getVendorId() == 0xbbaa && device.getProductId() == 0xddcc) {
+
+        // Check for both panda vendor IDs and product IDs
+        if ((device.getVendorId() == 0xbbaa || device.getVendorId() == 0x3801) &&
+            (device.getProductId() == 0xddcc || device.getProductId() == 0xddee)) {
             PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, new Intent(ACTION_USB_PERMISSION), PendingIntent.FLAG_MUTABLE);
             ((UsbManager) context.getSystemService(Context.USB_SERVICE)).requestPermission(device, pendingIntent);
         } else {
-            Log.w(TAG, "Found a USB device that's not a Panda");
+            Log.w(TAG, "Found a USB device that's not a Panda (VID: " + device.getVendorId() + ", PID: " + device.getProductId() + ")");
         }
     }
 
