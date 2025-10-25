@@ -110,7 +110,8 @@ public class CameraHandler implements SensorInterface {
             throw new RuntimeException("Unable to get camera manager.");
         }
 
-        String cameraId = "0";
+        // Use wide cam for LGG8
+        String cameraId = "2";
 
         try {
             cameraCharacteristics = manager.getCameraCharacteristics(cameraId);

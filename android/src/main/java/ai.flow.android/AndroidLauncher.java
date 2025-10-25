@@ -3,7 +3,6 @@ package ai.flow.android;
 import ai.flow.android.sensor.CameraHandler;
 //import ai.flow.android.vision.ONNXModelRunner;
 //import ai.flow.android.vision.SNPEModelRunner;
-import ai.flow.android.sensor.CameraManager;
 import ai.flow.android.vision.THNEEDModelRunner;
 import ai.flow.app.FlowUI;
 import ai.flow.common.ParamsInterface;
@@ -95,9 +94,8 @@ public class AndroidLauncher extends FragmentActivity implements AndroidFragment
 		params.put("DeviceModel", Build.MODEL);
 
 		AndroidApplicationConfiguration configuration = new AndroidApplicationConfiguration();
-//		SensorManager sensorManager = new SensorManager(appContext, 20);
 		CameraHandler cameraManager = new CameraHandler(getApplication().getApplicationContext());
-//		CameraManager cameraManager = new CameraManager(getApplication().getApplicationContext(), utils.F2 || Camera.FORCE_TELE_CAM_F3 ? Camera.CAMERA_TYPE_ROAD : Camera.CAMERA_TYPE_WIDE);
+
 
 		PandaManager pandaManager = new PandaManager(getApplication().getApplicationContext());
 		OnroadManager onroadManager = new OnroadManager(getApplication().getApplicationContext());
