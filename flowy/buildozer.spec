@@ -166,6 +166,9 @@ android.accept_sdk_license = True
 # (str) python-for-android branch to use, defaults to stable
 p4a.branch = develop
 
+# (str) python-for-android specific commit to use, defaults to HEAD, must be within p4a.branch
+p4a.commit = 5aa97321ebf7339edf04e707beccbf94a284f4c9
+
 # (str) OUYA Console category. Should be one of GAME or APP
 # If you leave this blank, OUYA support will not be enabled
 #android.ouya.category = GAME
