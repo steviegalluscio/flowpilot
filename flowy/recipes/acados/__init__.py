@@ -14,9 +14,8 @@ class AcadosRecipe(Recipe):
         'external/qpoases/lib/libqpOASES_e.so',
         'external/hpipm/libhpipm.so',
     ]
-    patches = ['include_stdlib.patch']
 
-    def build_arch(self, arch, **kwargs):        
+    def build_arch(self, arch, **kwargs):
         build_dir = join(self.get_build_dir(arch.arch), 'build')
         ensure_dir(build_dir)
         with current_directory(build_dir):
@@ -32,11 +31,12 @@ class AcadosRecipe(Recipe):
                     '-DACADOS_WITH_QPOASES=ON',
                     '-UBLASFEO_TARGET',
                     '-DBLASFEO_TARGET=ARMV8A_ARM_CORTEX_A57',
+                    '-DCMAKE_C_FLAGS="-includestdlib.h"',
 
                     '..',
                     _env=env)
             shprint(sh.make)
-            
+
             sh.cp('-a', *self.generated_libraries, self.ctx.get_libs_dir(arch.arch))
 
 recipe = AcadosRecipe()
