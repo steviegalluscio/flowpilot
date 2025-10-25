@@ -14,6 +14,7 @@ class AcadosRecipe(Recipe):
         'external/qpoases/lib/libqpOASES_e.so',
         'external/hpipm/libhpipm.so',
     ]
+    patches = ['include_stdlib.patch']
 
     def build_arch(self, arch, **kwargs):        
         build_dir = join(self.get_build_dir(arch.arch), 'build')
