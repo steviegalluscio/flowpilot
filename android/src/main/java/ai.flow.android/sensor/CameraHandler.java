@@ -7,7 +7,6 @@ import static android.hardware.camera2.CameraMetadata.LENS_FACING_BACK;
 import static android.hardware.camera2.CameraMetadata.LENS_FACING_FRONT;
 
 import static ai.flow.android.sensor.Utils.fillYUVBuffer;
-import static ai.flow.common.transformations.Camera.CAMERA_TYPE_ROAD;
 
 import android.Manifest;
 import android.content.Context;
@@ -110,8 +109,7 @@ public class CameraHandler implements SensorInterface {
             throw new RuntimeException("Unable to get camera manager.");
         }
 
-        // Use wide cam for LGG8
-        String cameraId = "2";
+        String cameraId = Integer.toString(Camera.UseCameraID);
 
         try {
             cameraCharacteristics = manager.getCameraCharacteristics(cameraId);
@@ -143,8 +141,7 @@ public class CameraHandler implements SensorInterface {
     private void startCamera() {
         List<Surface> list = new ArrayList<>();
 
-        final int width = 1280, height = 720;
-        reader = ImageReader.newInstance(width, height, ImageFormat.YUV_420_888, 5);
+        reader = ImageReader.newInstance(W, H, ImageFormat.YUV_420_888, 5);
 
         list.add(reader.getSurface());
 

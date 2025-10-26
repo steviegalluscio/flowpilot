@@ -7,25 +7,20 @@ import ai.flow.common.utils;
 
 public class Camera {
 
-    public static final boolean FORCE_TELE_CAM_F3 = false;
-
+    // Setup for LGG8 based on Phr00t fork
     public static float
-        FocalX = 930f,
-        FocalY = 930f,
-        CenterX = 640f, //632
-        CenterY = 360f; //358
+        FocalX = 1600f,
+        FocalY = 1600f,
+        CenterX = 952.62915f,
+        CenterY = 517.53534f;
 
-    // Camera 2
-   // MATRIX: [538.2648047477589, 0, 635.4029785884212;
-//0, 538.3225487046863, 348.6366566852139;
- //0, 0, 1]
-
-    public static int UseCameraID = 0;
+    // Use wide cam for LGG8
+    public static int UseCameraID = 2;
 
     // everything autocalculated below
     public static float actual_cam_focal_length = (FocalX + FocalY) * 0.5f;
-    public static float digital_zoom_apply = 1f; //actual_cam_focal_length / (utils.F2 ? Model.MEDMODEL_F2_FL : Model.MEDMODEL_FL);
-    public static final int[] frameSize = new int[]{1280, 720};
+    public static float digital_zoom_apply = actual_cam_focal_length / Model.MEDMODEL_FL;
+    public static final int[] frameSize = new int[]{1920, 1080};
     public static float OffsetX = CenterX - (frameSize[0]*0.5f);
     public static float OffsetY = CenterY - (frameSize[1]*0.5f);
 
@@ -51,10 +46,4 @@ public class Camera {
             {1.0f,  0.0f,  0.0f}
     });
 
-    // Camera #0 (telephoto)
-    /*public static final float[] WideIntrinsics = {
-            910f,   0.0f, 900f,
-            0.0f,   910f, 514f,
-            0.0f,   0.0f, 1.0f
-    };*/
 }
