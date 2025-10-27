@@ -23,14 +23,12 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.Matrix3;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.FillViewport;
-import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 
@@ -41,12 +39,6 @@ import messaging.ZMQPubHandler;
 import messaging.ZMQSubHandler;
 import org.apache.commons.lang3.ArrayUtils;
 import org.capnproto.PrimitiveList;
-import org.nd4j.linalg.api.memory.MemoryWorkspace;
-import org.nd4j.linalg.api.memory.conf.WorkspaceConfiguration;
-import org.nd4j.linalg.api.memory.enums.AllocationPolicy;
-import org.nd4j.linalg.api.memory.enums.LearningPolicy;
-import org.nd4j.linalg.api.ndarray.INDArray;
-import org.nd4j.linalg.factory.Nd4j;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -74,10 +66,6 @@ import static ai.flow.sensor.messages.MsgFrameBuffer.updateImageBuffer;
 public class OnRoadScreen extends ScreenAdapter {
     // avoid GC triggers.
     static final String VERSION = "73";
-    final WorkspaceConfiguration wsConfig = WorkspaceConfiguration.builder()
-            .policyAllocation(AllocationPolicy.STRICT)
-            .policyLearning(LearningPolicy.FIRST_LOOP)
-            .build();
     FlowUI appContext;
     ParamsInterface params = ParamsInterface.getInstance();
     // For camera frame receiving
@@ -547,7 +535,7 @@ public class OnRoadScreen extends ScreenAdapter {
     public void renderImage(boolean rgb) {
         if (!rgb) {
             if (nv12Renderer==null)
-                nv12Renderer = new NV12Renderer(Camera.frameSize[0], Camera.frameSize[1]);
+                nv12Renderer = new NV12Renderer(defaultImageWidth, defaultImageHeight);
             nv12Renderer.render(imgBuffer);
         }
         else{
@@ -598,17 +586,17 @@ public class OnRoadScreen extends ScreenAdapter {
             parsed.roadEdges.get(1).get(0)[i] = Math.max(parsed.roadEdges.get(1).get(0)[i], minZ);
         }
 
-        path = Draw.getLaneCameraFrame(parsed.position, Draw.cam_intrinsics, RtPath, 0.9f);
-        lane0 = Draw.getLaneCameraFrame(parsed.laneLines.get(0), Draw.cam_intrinsics, Rt, 0.07f);
-        lane1 = Draw.getLaneCameraFrame(parsed.laneLines.get(1), Draw.cam_intrinsics, Rt, 0.05f);
-        lane2 = Draw.getLaneCameraFrame(parsed.laneLines.get(2), Draw.cam_intrinsics, Rt, 0.05f);
-        lane3 = Draw.getLaneCameraFrame(parsed.laneLines.get(3), Draw.cam_intrinsics, Rt, 0.07f);
-        edge0 = Draw.getLaneCameraFrame(parsed.roadEdges.get(0), Draw.cam_intrinsics, Rt, 0.1f);
-        edge1 = Draw.getLaneCameraFrame(parsed.roadEdges.get(1), Draw.cam_intrinsics, Rt, 0.1f);
+        path = Draw.getLaneCameraFrame(parsed.position, RtPath, 0.9f);
+        lane0 = Draw.getLaneCameraFrame(parsed.laneLines.get(0), Rt, 0.07f);
+        lane1 = Draw.getLaneCameraFrame(parsed.laneLines.get(1), Rt, 0.05f);
+        lane2 = Draw.getLaneCameraFrame(parsed.laneLines.get(2), Rt, 0.05f);
+        lane3 = Draw.getLaneCameraFrame(parsed.laneLines.get(3), Rt, 0.07f);
+        edge0 = Draw.getLaneCameraFrame(parsed.roadEdges.get(0), Rt, 0.1f);
+        edge1 = Draw.getLaneCameraFrame(parsed.roadEdges.get(1), Rt, 0.1f);
 
-        lead1s = Draw.getTriangleCameraFrame(parsed.leads.get(0), Draw.cam_intrinsics, Rt, leadDrawScale);
-        lead2s = Draw.getTriangleCameraFrame(parsed.leads.get(1), Draw.cam_intrinsics, Rt, leadDrawScale);
-        lead3s = Draw.getTriangleCameraFrame(parsed.leads.get(2), Draw.cam_intrinsics, Rt, leadDrawScale);
+        lead1s = Draw.getTriangleCameraFrame(parsed.leads.get(0), Rt, leadDrawScale);
+        lead2s = Draw.getTriangleCameraFrame(parsed.leads.get(1), Rt, leadDrawScale);
+        lead3s = Draw.getTriangleCameraFrame(parsed.leads.get(2), Rt, leadDrawScale);
     }
 
     public void handleSounds(Definitions.ControlsState.Reader controlState, AudibleAlert alert){

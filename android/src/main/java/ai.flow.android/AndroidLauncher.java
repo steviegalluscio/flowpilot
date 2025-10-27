@@ -1,5 +1,7 @@
 package ai.flow.android;
 
+import ai.flow.android.sensor.CameraManager;
+import ai.flow.android.sensor.SensorManager;
 import ai.flow.android.sensor.CameraHandler;
 //import ai.flow.android.vision.ONNXModelRunner;
 //import ai.flow.android.vision.SNPEModelRunner;
@@ -94,7 +96,12 @@ public class AndroidLauncher extends FragmentActivity implements AndroidFragment
 		params.put("DeviceModel", Build.MODEL);
 
 		AndroidApplicationConfiguration configuration = new AndroidApplicationConfiguration();
-		CameraHandler cameraManager = new CameraHandler(getApplication().getApplicationContext());
+		//CameraHandler cameraManager = new CameraHandler(getApplication().getApplicationContext()); //the app way with camerahandler
+        CameraManager cameraManager, cameraManagerWide = null;
+        SensorManager sensorManager = new SensorManager(appContext, 100);
+        cameraManager = new CameraManager(getApplication().getApplicationContext(), Camera.CAMERA_TYPE_WIDE);
+        CameraManager finalCameraManager = cameraManager; // stupid java
+
 
 
 		PandaManager pandaManager = new PandaManager(getApplication().getApplicationContext());
@@ -106,8 +113,9 @@ public class AndroidLauncher extends FragmentActivity implements AndroidFragment
 //			put("modelparsed", modelparsedManager);
 		}};
 		sensors = new HashMap<String, SensorInterface>() {{
-			put("roadCamera", cameraManager);
-//			put("motionSensors", sensorManager);
+            put("roadCamera", finalCameraManager);
+            put("wideRoadCamera", finalCameraManager); // use same camera until we move away from wide camera-only mode.
+            put("motionSensors", sensorManager);
 		}};
 
 
@@ -165,7 +173,7 @@ public class AndroidLauncher extends FragmentActivity implements AndroidFragment
 
 
 		MainFragment fragment = new MainFragment(new FlowUI(launcher, androidHardwareManager, pid));
-//		cameraManager.setLifeCycleFragment(fragment);
+		cameraManager.setLifeCycleFragment(fragment);
 		FragmentTransaction trans = getSupportFragmentManager().beginTransaction();
 		trans.replace(android.R.id.content, fragment);
 		trans.commit();
