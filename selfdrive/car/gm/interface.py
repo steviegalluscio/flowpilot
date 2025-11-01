@@ -6,7 +6,7 @@ from panda import Panda
 from common.conversions import Conversions as CV
 from selfdrive.car import STD_CARGO_KG, create_button_event, scale_tire_stiffness, get_safety_config
 from selfdrive.car.gm.radar_interface import RADAR_HEADER_MSG
-from selfdrive.car.gm.values import CAR, CruiseButtons, CarControllerParams, EV_CAR, CAMERA_ACC_CAR, CanBus
+from selfdrive.car.gm.values import CAR, CruiseButtons, CarControllerParams, EV_CAR, CAMERA_ACC_CAR, SDGM_CAR, CanBus
 from selfdrive.car.interfaces import CarInterfaceBase, TorqueFromLateralAccelCallbackType, FRICTION_THRESHOLD
 from selfdrive.controls.lib.drive_helpers import get_friction
 
@@ -85,13 +85,13 @@ class CarInterface(CarInterfaceBase):
     ret.longitudinalTuning.kpBP = [5., 35.]
     ret.longitudinalTuning.kiBP = [0.]
 
-    if candidate in CAMERA_ACC_CAR:
-      ret.experimentalLongitudinalAvailable = True
+    if candidate in (CAMERA_ACC_CAR | SDGM_CAR):
+      ret.experimentalLongitudinalAvailable = candidate not in SDGM_CAR
       ret.networkLocation = NetworkLocation.fwdCamera
       ret.radarUnavailable = True  # no radar
       ret.pcmCruise = True
       ret.safetyConfigs[0].safetyParam |= Panda.FLAG_GM_HW_CAM
-      ret.minEnableSpeed = 5 * CV.KPH_TO_MS
+      ret.minEnableSpeed = -1 if candidate in SDGM_CAR else 5 * CV.KPH_TO_MS
       ret.minSteerSpeed = 10 * CV.KPH_TO_MS
 
       # Tuning for experimental long
@@ -234,6 +234,7 @@ class CarInterface(CarInterfaceBase):
       CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
 
     elif candidate == CAR.TRAILBLAZER:
+      #mass=1345, wheelbase=2.64, steerRatio=16.8, centerToFrontRatio=0.4, tireStiffnessFactor=1.0)
       ret.mass = 1345. + STD_CARGO_KG
       ret.wheelbase = 2.64
       ret.steerRatio = 16.8
@@ -241,6 +242,29 @@ class CarInterface(CarInterfaceBase):
       tire_stiffness_factor = 1.0
       ret.steerActuatorDelay = 0.2
       CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
+
+    elif candidate == CAR.CADILLAC_XT4:
+      #mass=1660, wheelbase=2.78, steerRatio=14.4, centerToFrontRatio=0.4
+      ret.mass = 1660. + STD_CARGO_KG
+      ret.wheelbase = 2.78
+      ret.steerRatio = 14.4
+      ret.centerToFront = ret.wheelbase * 0.4
+      ret.steerActuatorDelay = 0.2
+      ret.minSteerSpeed = 30 * CV.MPH_TO_MS
+      CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
+
+    elif candidate == CAR.CHEVROLET_VOLT_2019:
+      #mass=1607, wheelbase=2.69, steerRatio=15.7, centerToFrontRatio=0.45
+      ret.mass = 1607. + STD_CARGO_KG
+      ret.wheelbase = 2.69
+      ret.steerRatio = 15.7
+      ret.centerToFront = ret.wheelbase * 0.45
+      ret.steerActuatorDelay = 0.2
+      ret.minSteerSpeed = 10 * CV.KPH_TO_MS
+
+      CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
+
+
 
     # TODO: start from empirically derived lateral slip stiffness for the civic and scale by
     # mass and CG position, so all cars will have approximately similar dyn behaviors
