@@ -37,7 +37,7 @@ class CarControllerParams:
     self.ZERO_GAS = 2048  # Coasting
     self.MAX_BRAKE = 400  # ~ -4.0 m/s^2 with regen
 
-    if CP.carFingerprint in (CAMERA_ACC_CAR | SDGM_CAR)::
+    if CP.carFingerprint in (CAMERA_ACC_CAR | SDGM_CAR):
       self.MAX_GAS = 3400
       self.MAX_ACC_REGEN = 1514
       self.INACTIVE_REGEN = 1554
@@ -75,7 +75,7 @@ class CAR:
   EQUINOX = "CHEVROLET EQUINOX 2019"
   TRAILBLAZER = "CHEVROLET TRAILBLAZER 2021"
   CADILLAC_XT4 = "CADILLAC XT4 2023"
-  CHEVROLET_VOLT_2019 "CHEVROLET VOLT 2019"
+  CHEVROLET_VOLT_2019 = "CHEVROLET VOLT 2019"
 
 
 class Footnote(Enum):
@@ -117,8 +117,8 @@ CAR_INFO: Dict[str, Union[GMCarInfo, List[GMCarInfo]]] = {
   ],
   CAR.EQUINOX: GMCarInfo("Chevrolet Equinox 2019-22"),
   CAR.TRAILBLAZER: GMCarInfo("Chevrolet Trailblazer 2021-22"),
-  CAR.CADILLAC_XT4 = GMCarInfo("Cadillac XT4 2023", "Driver Assist Package"),
-  CAR.CHEVROLET_VOLT_2019 = GMCarInfo("Chevrolet Volt 2019", "Adaptive Cruise Control (ACC) & LKAS"),
+  CAR.CADILLAC_XT4: GMCarInfo("Cadillac XT4 2023", "Driver Assist Package"),
+  CAR.CHEVROLET_VOLT_2019: GMCarInfo("Chevrolet Volt 2019", "Adaptive Cruise Control (ACC) & LKAS"),
 }
 
 
