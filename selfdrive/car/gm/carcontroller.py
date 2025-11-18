@@ -6,6 +6,7 @@ from opendbc.can.packer import CANPacker
 from selfdrive.car import apply_driver_steer_torque_limits
 from selfdrive.car.gm import gmcan
 from selfdrive.car.gm.values import DBC, CanBus, CarControllerParams, CruiseButtons
+from common.logger import sLogger
 
 VisualAlert = car.CarControl.HUDControl.VisualAlert
 NetworkLocation = car.CarParams.NetworkLocation
@@ -66,7 +67,9 @@ class CarController:
     # Avoid GM EPS faults when transmitting messages too close together: skip this transmit if we
     # received the ASCMLKASteeringCmd loopback confirmation too recently
     last_lka_steer_msg_ms = (now_nanos - CS.loopback_lka_steering_cmd_ts_nanos) * 1e-6
-    if (self.frame - self.last_steer_frame) >= steer_step and last_lka_steer_msg_ms > MIN_STEER_MSG_INTERVAL_MS:
+
+    sLogger.Send("0last_lka_steer_msg_ms" + "{:.2f}".format(last_lka_steer_msg_ms))
+    if (self.frame - self.last_steer_frame) >= steer_step: #and last_lka_steer_msg_ms > MIN_STEER_MSG_INTERVAL_MS:
       # Initialize ASCMLKASteeringCmd counter using the camera until we get a msg on the bus
       if CS.loopback_lka_steering_cmd_ts_nanos == 0:
         self.lka_steering_cmd_counter = CS.pt_lka_steering_cmd_counter + 1
