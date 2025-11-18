@@ -122,7 +122,6 @@ class CarState(CarStateBase):
     checks = []
     if CP.networkLocation == NetworkLocation.fwdCamera:
       signals += [
-        ("AEBCmdActive", "AEBCmd"),
         ("RollingCounter", "ASCMLKASteeringCmd"),
         ("ACCSpeedSetpoint", "ASCMActiveCruiseControlStatus"),
         ("ACCCruiseState", "ASCMActiveCruiseControlStatus"),
@@ -132,6 +131,9 @@ class CarState(CarStateBase):
         ("ASCMActiveCruiseControlStatus", 25),
       ]
       if CP.carFingerprint not in SDGM_CAR:
+        signals += [
+          ("AEBCmdActive", "AEBCmd"),
+        ]
         checks += [
           ("AEBCmd", 10),
         ]
