@@ -21,7 +21,7 @@ class Resetter():
     self._context = usb1.USBContext()
     self._context.open()
     for device in self._context.getDeviceList(skip_on_error=True):
-      if device.getVendorID() == 0xbbaa and device.getProductID() == 0xddc0:
+      if device.getVendorID() in (0xbbaa, 0x3801) and device.getProductID() == 0xddc0:
         try:
           self._handle = device.open()
           self._handle.claimInterface(0)

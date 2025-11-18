@@ -15,10 +15,14 @@ def set_time(logger):
 
   try:
     ctx = usb1.USBContext()
-    dev = ctx.openByVendorIDAndProductID(0xbbaa, 0xddcc)
-    if dev is None:
+    
+    dev = ctx.openByVendorIDAndProductID(0x3801, 0xddcc)
+    dev_old = ctx.openByVendorIDAndProductID(0xbbaa, 0xddcc)
+    if dev and dev_old is None:
       logger.info("No panda found")
       return
+    elif dev_old is not None:
+      dev = dev_old
 
     # Set system time from panda RTC time
     dat = dev.controlRead(REQUEST_IN, 0xa0, 0, 0, 8)

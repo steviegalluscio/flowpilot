@@ -19,7 +19,7 @@
 #define VIN_READOUT_DIVIDER 11U
 
 // USB definitions
-#define USB_VID 0xBBAAU
+#define USB_VID 0x3801U
 
 #ifdef PANDA_JUNGLE
   #ifdef BOOTSTUB
